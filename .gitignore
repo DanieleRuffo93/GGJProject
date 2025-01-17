@@ -81,3 +81,8 @@ DerivedDataCache/*
 
 # Git
 .git
+
+# Customs
+
+.editorconfig
+shadertoolsconfig.json
