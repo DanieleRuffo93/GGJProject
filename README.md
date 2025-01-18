@@ -19,10 +19,14 @@ To ensure stability and smooth development:
 - Daniele Ruffo  
 - Andrea Pesci  
 - Marco Pungillo  
-
-### Designers
-- Michael Orsini  
+- Andrea Stelliferi
 
 ### Artists
 - Aurora Raffeli Albo  
 - Miguel Hinojosa  
+
+### Designer
+- Michael Orsini  
+
+### Sound
+- Emanuele L. Adolfi  
