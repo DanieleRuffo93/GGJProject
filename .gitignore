@@ -86,3 +86,7 @@ DerivedDataCache/*
 
 .editorconfig
 shadertoolsconfig.json
+
+#fmod
+Plugins/FMODStudio/*
+Plugins/FMODStudioNiagara/*
