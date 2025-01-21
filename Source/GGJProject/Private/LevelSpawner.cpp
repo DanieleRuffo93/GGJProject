@@ -41,7 +41,10 @@ void ALevelSpawner::UpdateLevelsAndLevelDatas(UDataTable* LevelDataTable)
 	FName newLevel = ChoseRandomLevelByDifficulty(CurrentDifficulty, LevelDataTable, bLevelFound);
 	NextLevelDatas = LevelDataTable->FindRow<FLevelSpawnData>(newLevel, TEXT(""));
 
-	TotalHeight += CurrentLevelDatas->Height;
+	if (CurrentLevelDatas)
+	{
+		TotalHeight += CurrentLevelDatas->Height;
+	}
 
 	LoadLevelByName(FName(NextLevelDatas->LevelAssetName));
 }
