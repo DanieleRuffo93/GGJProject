@@ -54,6 +54,9 @@ ADynamicSideScrollerCharacter::ADynamicSideScrollerCharacter()
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 
 	ScanDistance = 250.0f;
+	bCanJump = false;
+
+	bBufferedJump = false;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -79,7 +82,7 @@ void ADynamicSideScrollerCharacter::SetupPlayerInputComponent(UInputComponent* P
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
 
 		// Jumping
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ADynamicSideScrollerCharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
 		// Moving
@@ -89,6 +92,49 @@ void ADynamicSideScrollerCharacter::SetupPlayerInputComponent(UInputComponent* P
 	{
 		UE_LOG(LogPlayerCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
+}
+
+void ADynamicSideScrollerCharacter::Jump()
+{
+	if (!CanJump())
+	{
+		BufferJump();
+		return;
+	}
+
+	Super::Jump();
+
+	if (bCanJump)
+	{
+		FVector LaunchVector(0.0f, 0.0f, GetCharacterMovement()->JumpZVelocity);
+		LaunchCharacter(LaunchVector, false, false);
+	}
+}
+
+void ADynamicSideScrollerCharacter::BufferJump()
+{
+	bBufferedJump = true;
+}
+
+void ADynamicSideScrollerCharacter::OnBufferedJump_Implementation()
+{
+	BufferJump();
+}
+
+void ADynamicSideScrollerCharacter::UnbufferJump()
+{
+	bBufferedJump = false;
+}
+
+void ADynamicSideScrollerCharacter::OnUnbufferedJump_Implementation()
+{
+	UnbufferJump();
+}
+
+void ADynamicSideScrollerCharacter::Landed(const FHitResult& Hit)
+{
+	Super::Landed(Hit);
+
 }
 
 void ADynamicSideScrollerCharacter::Move(const FInputActionValue& Value)

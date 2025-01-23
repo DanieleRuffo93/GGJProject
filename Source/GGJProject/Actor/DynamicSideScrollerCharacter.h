@@ -57,6 +57,32 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Path)
 	float ScanDistance;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Jump)
+	bool bCanJump ;
+	
+	virtual void Jump() override;
+
+	virtual void Landed(const FHitResult& Hit) override;
+
+
+	UFUNCTION(BlueprintCallable, Category = "Jump Buffer")
+	void BufferJump();
+
+	UFUNCTION(BlueprintNativeEvent, Category = Character)
+	void OnBufferedJump();
+	virtual void OnBufferedJump_Implementation();
+
+	UFUNCTION(BlueprintCallable, Category = "Jump Unbuffer")
+	void UnbufferJump();
+
+	UFUNCTION(BlueprintNativeEvent, Category = Character)
+	void OnUnbufferedJump();
+	virtual void OnUnbufferedJump_Implementation();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Jump)
+	bool bBufferedJump;
+
+
 protected:
 
 	/** Called for movement input */
