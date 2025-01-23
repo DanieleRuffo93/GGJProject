@@ -1,67 +1,89 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "GGJProjectCharacter.h"
+
 #include "Engine/LocalPlayer.h"
-#include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/Controller.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "Camera/CameraComponent.h"
+#include "Component/SuperellipseOrbitComponent.h"
+#include "GameFramework/GameModeBase.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
-//////////////////////////////////////////////////////////////////////////
-// AGGJProjectCharacter
-
 AGGJProjectCharacter::AGGJProjectCharacter()
 {
-	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
-		
-	// Don't rotate when the controller rotates. Let that just affect the camera.
+	
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
-
-	// Configure character movement
-	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
-	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f); // ...at this rotation rate
-
-	// Note: For faster iteration times these variables, and many more, can be tweaked in the Character Blueprint
-	// instead of recompiling to adjust them
+	
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f);
+	
 	GetCharacterMovement()->JumpZVelocity = 700.f;
 	GetCharacterMovement()->AirControl = 0.35f;
 	GetCharacterMovement()->MaxWalkSpeed = 500.f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
-
-	// Create a camera boom (pulls in towards the player if there is a collision)
+	
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 400.0f; // The camera follows at this distance behind the character	
-	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
-
-	// Create a follow camera
+	CameraBoom->TargetArmLength = 400.0f; 
+	CameraBoom->bUsePawnControlRotation = false;
+	
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
-	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
-	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
-
-	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
-	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
+	FollowCamera->bUsePawnControlRotation = false;
 }
 
-//////////////////////////////////////////////////////////////////////////
-// Input
+void AGGJProjectCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	AGameModeBase* GameMode = UGameplayStatics::GetGameMode(this);
+	if (GameMode)
+	{
+		USuperellipseOrbitComponent* OrbitComp = GameMode->FindComponentByClass<USuperellipseOrbitComponent>();
+		if (OrbitComp)
+		{
+			OrbitComponent = OrbitComp;
+			if (OrbitComponent->bHasBeenInitialized)
+			{
+				OnOrbitReady();
+			}
+			else
+				if (!bDelegateRegistered)
+				{
+					OrbitComponent->OnOrbitInitialized.AddDynamic(this, &AGGJProjectCharacter::OnOrbitReady);
+					bDelegateRegistered = true;
+				}
+		}
+	}
+}
+
+void AGGJProjectCharacter::OnOrbitReady()
+{
+	FVector DirectionToCurrent = GetActorLocation() - OrbitComponent->CenterLocation;
+	DirectionToCurrent.Z = 0.0f;
+	CurrentAngle = FMath::Atan2(DirectionToCurrent.Y, DirectionToCurrent.X);
+	CurrentAngle = FMath::Fmod(CurrentAngle + 2.0f * PI, 2.0f * PI);
+	UE_LOG(LogTemp, Warning, TEXT("CurrentAngle %f"), CurrentAngle);
+	bIsOrbitInitialized = true;
+	UpdateCameraPosition();
+}
 
 void AGGJProjectCharacter::NotifyControllerChanged()
 {
 	Super::NotifyControllerChanged();
-
-	// Add Input Mapping Context
+	
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
@@ -73,18 +95,11 @@ void AGGJProjectCharacter::NotifyControllerChanged()
 
 void AGGJProjectCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
 		
-		// Jumping
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
-
-		// Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AGGJProjectCharacter::Move);
-
-		// Looking
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AGGJProjectCharacter::Look);
 	}
 	else
 	{
@@ -94,36 +109,35 @@ void AGGJProjectCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 void AGGJProjectCharacter::Move(const FInputActionValue& Value)
 {
-	// input is a Vector2D
-	FVector2D MovementVector = Value.Get<FVector2D>();
-
-	if (Controller != nullptr)
-	{
-		// find out which way is forward
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-
-		// get forward vector
-		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	if(!bIsOrbitInitialized) return;
 	
-		// get right vector 
-		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
-		// add movement 
-		AddMovementInput(ForwardDirection, MovementVector.Y);
-		AddMovementInput(RightDirection, MovementVector.X);
+	FVector2D MovementVector = Value.Get<FVector2D>();
+	if (OrbitComponent && OrbitComponent->CenterActor && MovementVector.X != 0.0f)
+	{
+		float DeltaAngle = FMath::DegreesToRadians(90.0f) * MovementVector.X * GetWorld()->GetDeltaSeconds();
+		
+		CurrentAngle += DeltaAngle;
+		
+		CurrentAngle = FMath::Fmod(CurrentAngle, 2.0f * PI);
+		if (CurrentAngle < 0.0f)
+			CurrentAngle += 2.0f * PI;
+		
+		FVector2D NewLocation = OrbitComponent->CalculatePosition(CurrentAngle);
+		FVector TangentDirection = OrbitComponent->GetTangentDirection(CurrentAngle, FMath::Sign(MovementVector.X));
+		
+		SetActorLocation(FVector(NewLocation.X, NewLocation.Y, GetActorLocation().Z));
+		SetActorRotation(TangentDirection.Rotation());
+		UpdateCameraPosition();
 	}
 }
 
-void AGGJProjectCharacter::Look(const FInputActionValue& Value)
+void AGGJProjectCharacter::UpdateCameraPosition()
 {
-	// input is a Vector2D
-	FVector2D LookAxisVector = Value.Get<FVector2D>();
-
-	if (Controller != nullptr)
+	if (CameraBoom && OrbitComponent)
 	{
-		// add yaw and pitch input to controller
-		AddControllerYawInput(LookAxisVector.X);
-		AddControllerPitchInput(LookAxisVector.Y);
+		FVector DirectionToCenterOfOrbit = OrbitComponent->CenterLocation - CameraBoom->GetComponentLocation();
+		DirectionToCenterOfOrbit.Z = 0;
+		FRotator LookAtCenterRotation = DirectionToCenterOfOrbit.Rotation();
+		CameraBoom->SetWorldRotation(LookAtCenterRotation);
 	}
 }

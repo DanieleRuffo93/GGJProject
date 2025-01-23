@@ -11,6 +11,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
+class USuperellipseOrbitComponent;
 struct FInputActionValue;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
@@ -19,6 +20,8 @@ UCLASS(config=Game)
 class AGGJProjectCharacter : public ACharacter
 {
 	GENERATED_BODY()
+
+	
 
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -43,18 +46,27 @@ class AGGJProjectCharacter : public ACharacter
 	/** Look Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* LookAction;
+	
+	float CurrentAngle {0.f};
+	float RotationSpeed {0.f};
+	bool bIsOrbitInitialized {false};
+	bool bDelegateRegistered {false};
+	
+	UFUNCTION()
+	void OnOrbitReady();
+	void UpdateCameraPosition();
+
 
 public:
 	AGGJProjectCharacter();
 	
-
+	TObjectPtr<USuperellipseOrbitComponent> OrbitComponent;
+	
 protected:
-
+	virtual void BeginPlay() override;
+	
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
-
-	/** Called for looking input */
-	void Look(const FInputActionValue& Value);
 			
 
 protected:
