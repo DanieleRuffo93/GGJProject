@@ -155,6 +155,10 @@ void ADynamicSideScrollerCharacter::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 
 	UpdateCameraPosition();
+	if(bDrawDebug)
+	{
+		OrbitComponent->DrawOrbit(GetActorLocation().Z);
+	}
 }
 
 void ADynamicSideScrollerCharacter::OnOrbitReady()
@@ -166,6 +170,7 @@ void ADynamicSideScrollerCharacter::OnOrbitReady()
 	UE_LOG(LogTemp, Warning, TEXT("CurrentAngle %f"), CurrentAngle);
 	bIsOrbitInitialized = true;
 	UpdateCameraPosition();
+	
 }
 
 void ADynamicSideScrollerCharacter::MoveSpline(const FInputActionValue& Value)
@@ -222,7 +227,6 @@ void ADynamicSideScrollerCharacter::Move(const FInputActionValue& Value)
 	if (InputValue == 0.0f) return;
 	
 	int8 MovementDirection = (InputValue > 0.0f) ? 1 : -1;
-	UE_LOG(LogTemp, Warning, TEXT(" MovementDirection: %d:"), MovementDirection);
 	
 	CurrentAngle = OrbitComponent->CalculateDeltaAngle(CurrentAngle, GetWorld()->GetDeltaSeconds(), GetCharacterMovement()->MaxWalkSpeed, MovementDirection);
 	
@@ -230,11 +234,8 @@ void ADynamicSideScrollerCharacter::Move(const FInputActionValue& Value)
 	FVector NextPosition(NextPosition2D.X, NextPosition2D.Y, GetActorLocation().Z);
 	
 	FVector MovementDirectionVector = (NextPosition - GetActorLocation()).GetSafeNormal();
-
-	// Applica il movimento
+	
 	AddMovementInput(MovementDirectionVector);
-
-
 	
 }
 
@@ -248,5 +249,3 @@ void ADynamicSideScrollerCharacter::UpdateCameraPosition()
 		CameraBoom->SetWorldRotation(LookAtCenterRotation);
 	}
 }
-
-

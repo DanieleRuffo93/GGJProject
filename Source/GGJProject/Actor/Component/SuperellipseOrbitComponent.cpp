@@ -36,12 +36,9 @@ void USuperellipseOrbitComponent::FindCenterActor()
 			CenterLocation = CenterActor->GetActorLocation();
 			FVector Origin, Extent;
 			CenterActor->GetActorBounds(true, Origin, Extent);
+			// TODO Calculate CenterLocation independently from Origin location
 			//CenterLocation = Origin + (Extent * 0.5f);
 			CenterActorExtent = FVector2D(Extent.X, Extent.Y);
-			UE_LOG(LogTemp, Warning, TEXT("Origin: %s"), *Origin.ToString());
-			UE_LOG(LogTemp, Warning, TEXT("Extent: %s"), *Extent.ToString());
-			UE_LOG(LogTemp, Warning, TEXT("CenterLocation: %s"), *CenterLocation.ToString());
-			
 
 			CalculateOrbitLength();
 			if (!bHasBeenInitialized)
@@ -74,7 +71,6 @@ void USuperellipseOrbitComponent::CalculateOrbitLength()
 	}
 
 	OrbitLength = TotalLength;
-	UE_LOG(LogTemp, Warning, TEXT("Lunghezza orbita: %f"), OrbitLength);
 }
 
 FVector2D USuperellipseOrbitComponent::CalculatePosition(float Angle, float RadiusOverride) const
@@ -98,9 +94,7 @@ FVector2D USuperellipseOrbitComponent::CalculatePosition(float Angle, float Radi
 
 float USuperellipseOrbitComponent::CalculateDeltaAngle(float CurrentAngle, float DeltaTime, float RotationSpeed, int8 MovementDirection ) const
 {
-	UE_LOG(LogTemp, Warning, TEXT("RotationSpeed: %f, MovementDirection: %d, CurrentAngle: %f"), RotationSpeed, MovementDirection, CurrentAngle);
 	float DeltaAngle = FMath::DegreesToRadians(RotationSpeed) * DeltaTime * MovementDirection;
-	UE_LOG(LogTemp, Warning, TEXT("DeltaAngle: %f"), DeltaAngle);
 	CurrentAngle += DeltaAngle;
 	
 	CurrentAngle = FMath::Fmod(CurrentAngle, 2.0f * PI);
@@ -108,7 +102,6 @@ float USuperellipseOrbitComponent::CalculateDeltaAngle(float CurrentAngle, float
 	{
 		CurrentAngle += 2.0f * PI;
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Final CurrentAngle: %f"), CurrentAngle);
 	return CurrentAngle;
 }
 
@@ -119,4 +112,40 @@ FVector USuperellipseOrbitComponent::GetTangentDirection(float Angle, int32 Dire
 		FMath::Cos(Angle) * Direction,
 		0.0f
 	).GetSafeNormal();
+}
+
+void USuperellipseOrbitComponent::DrawOrbit(float ZAxis)
+
+{
+	if (!CenterActor) return;
+	
+	float DeltaAngle = 0.1f;
+	FVector2D PreviousPoint = CalculatePosition(0.0f);
+	
+	for (float Angle = DeltaAngle; Angle < 2.0f * PI; Angle += DeltaAngle)
+	{
+		FVector2D CurrentPoint = CalculatePosition(Angle);
+		
+		DrawDebugLine(
+			GetWorld(),
+			FVector{ PreviousPoint.X, PreviousPoint.Y, ZAxis},
+			FVector{ CurrentPoint.X, CurrentPoint.Y, ZAxis},
+			FColor::Green,
+			false,
+			-1.0f, 
+			0, 
+			2.0f 
+		);
+		DrawDebugPoint(
+			GetWorld(),
+			FVector{ CurrentPoint.X, CurrentPoint.Y, ZAxis},
+			10.0f,
+			FColor::Red,
+			false,
+			-1.0f,
+			0 
+		);
+
+		PreviousPoint = CurrentPoint;
+	}
 }

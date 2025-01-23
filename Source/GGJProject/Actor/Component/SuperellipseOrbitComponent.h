@@ -38,6 +38,7 @@ public:
 	FVector GetTangentDirection(float Angle, int32 Direction) const;
 	void FindCenterActor();
 	void CalculateOrbitLength();
+	void DrawOrbit(float ZAxis);
 
 protected:
 	virtual void BeginPlay() override;
