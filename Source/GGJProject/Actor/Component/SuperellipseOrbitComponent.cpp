@@ -36,7 +36,13 @@ void USuperellipseOrbitComponent::FindCenterActor()
 			CenterLocation = CenterActor->GetActorLocation();
 			FVector Origin, Extent;
 			CenterActor->GetActorBounds(true, Origin, Extent);
+			//CenterLocation = Origin + (Extent * 0.5f);
 			CenterActorExtent = FVector2D(Extent.X, Extent.Y);
+			UE_LOG(LogTemp, Warning, TEXT("Origin: %s"), *Origin.ToString());
+			UE_LOG(LogTemp, Warning, TEXT("Extent: %s"), *Extent.ToString());
+			UE_LOG(LogTemp, Warning, TEXT("CenterLocation: %s"), *CenterLocation.ToString());
+			
+
 			CalculateOrbitLength();
 			if (!bHasBeenInitialized)
 			{
@@ -68,7 +74,7 @@ void USuperellipseOrbitComponent::CalculateOrbitLength()
 	}
 
 	OrbitLength = TotalLength;
-	UE_LOG(LogTemp, Log, TEXT("Lunghezza orbita: %f"), OrbitLength);
+	UE_LOG(LogTemp, Warning, TEXT("Lunghezza orbita: %f"), OrbitLength);
 }
 
 FVector2D USuperellipseOrbitComponent::CalculatePosition(float Angle, float RadiusOverride) const
@@ -90,9 +96,11 @@ FVector2D USuperellipseOrbitComponent::CalculatePosition(float Angle, float Radi
 	return FVector2D(NewX, NewY);
 }
 
-float USuperellipseOrbitComponent::CalculateDeltaAngle(float CurrentAngle, float DeltaTime, float RotationSpeed, uint8 MovementDirection ) const
+float USuperellipseOrbitComponent::CalculateDeltaAngle(float CurrentAngle, float DeltaTime, float RotationSpeed, int8 MovementDirection ) const
 {
+	UE_LOG(LogTemp, Warning, TEXT("RotationSpeed: %f, MovementDirection: %d, CurrentAngle: %f"), RotationSpeed, MovementDirection, CurrentAngle);
 	float DeltaAngle = FMath::DegreesToRadians(RotationSpeed) * DeltaTime * MovementDirection;
+	UE_LOG(LogTemp, Warning, TEXT("DeltaAngle: %f"), DeltaAngle);
 	CurrentAngle += DeltaAngle;
 	
 	CurrentAngle = FMath::Fmod(CurrentAngle, 2.0f * PI);
@@ -100,6 +108,7 @@ float USuperellipseOrbitComponent::CalculateDeltaAngle(float CurrentAngle, float
 	{
 		CurrentAngle += 2.0f * PI;
 	}
+	UE_LOG(LogTemp, Warning, TEXT("Final CurrentAngle: %f"), CurrentAngle);
 	return CurrentAngle;
 }
 

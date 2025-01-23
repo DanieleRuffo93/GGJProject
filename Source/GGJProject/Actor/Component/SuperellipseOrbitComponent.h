@@ -34,7 +34,7 @@ public:
 	bool bHasBeenInitialized {false};
 	
 	FVector2D CalculatePosition(float Angle, float RadiusOverride = -1.f) const;
-	float CalculateDeltaAngle(float CurrentAngle, float DeltaTime, float RotationSpeed, uint8 MovementDirection) const;
+	float CalculateDeltaAngle(float CurrentAngle, float DeltaTime, float RotationSpeed, int8 MovementDirection) const;
 	FVector GetTangentDirection(float Angle, int32 Direction) const;
 	void FindCenterActor();
 	void CalculateOrbitLength();

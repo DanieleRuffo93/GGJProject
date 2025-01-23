@@ -71,7 +71,6 @@ void AGGJProjectCharacter::BeginPlay()
 
 void AGGJProjectCharacter::OnOrbitReady()
 {
-	;
 	FVector DirectionToCurrent = GetActorLocation() - OrbitComponent->CenterLocation;
 	DirectionToCurrent.Z = 0.0f;
 	CurrentAngle = FMath::Atan2(DirectionToCurrent.Y, DirectionToCurrent.X);
