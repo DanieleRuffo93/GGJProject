@@ -82,6 +82,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Jump)
 	bool bBufferedJump;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SolidBubble)
+	bool bIsSolidBubbleSpawned;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SolidBubble)
+	float SolidBubbleCooldown;
+
 
 protected:
 

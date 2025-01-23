@@ -57,6 +57,9 @@ ADynamicSideScrollerCharacter::ADynamicSideScrollerCharacter()
 	bCanJump = false;
 
 	bBufferedJump = false;
+
+	bIsSolidBubbleSpawned = false;
+	SolidBubbleCooldown = 1.0f;
 }
 
 //////////////////////////////////////////////////////////////////////////
