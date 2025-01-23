@@ -1,62 +1,91 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "BaseMovementComponent.h"
-
-#include "Components/SplineComponent.h"
+#include "SuperellipseOrbitComponent.h"
+#include "GameFramework/GameModeBase.h"
+#include "Kismet/GameplayStatics.h"
 
 UBaseMovementComponent::UBaseMovementComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-	CurrentDirection = FVector(1.0f, 0.0f, 0.0f);
 }
 
 void UBaseMovementComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	AGameModeBase* GameMode = UGameplayStatics::GetGameMode(this);
+	if (GameMode)
+	{
+		USuperellipseOrbitComponent* OrbitComp = GameMode->FindComponentByClass<USuperellipseOrbitComponent>();
+		if (OrbitComp)
+		{
+			OrbitComponent = OrbitComp;
+			if (OrbitComponent->bHasBeenInitialized)
+			{
+				OnOrbitReady();
+			}
+			else
+				if (!bDelegateRegistered)
+				{
+					OrbitComponent->OnOrbitInitialized.AddDynamic(this, &UBaseMovementComponent::OnOrbitReady);
+					bDelegateRegistered = true;
+				}
+		}
+	}
 }
+
+void UBaseMovementComponent::OnOrbitReady()
+{
+	AActor* Owner = GetOwner();
+	if (!IsValid(Owner)) return;
+	
+	FVector DirectionToCurrent = Owner->GetActorLocation() - OrbitComponent->CenterLocation;
+	DirectionToCurrent.Z = 0.0f;
+	CurrentAngle = FMath::Atan2(DirectionToCurrent.Y, DirectionToCurrent.X);
+	CurrentAngle = FMath::Fmod(CurrentAngle + 2.0f * PI, 2.0f * PI);
+	bIsOrbitInitialized = true;
+}
+
 
 void UBaseMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if(!bIsOrbitInitialized) return;
 	
 	AActor* Owner = GetOwner();
-	if (!Owner || !SplineToFollow) return;
+	if (!IsValid(Owner) || !IsValid(OrbitComponent)) return;
 	
 	if (!IsGroundAhead())
 	{
-		bMovingForward = !bMovingForward;
-		return;
+		MovementDirection = -MovementDirection;
 	}
-	
-	float MovementThisFrame = MovementSpeed * DeltaTime;
-	if (!bMovingForward)
-	{
-		MovementThisFrame = -MovementThisFrame;
-	}
-	
-	CurrentDistance += MovementThisFrame;
 
-	FVector NewLocation = SplineToFollow->GetLocationAtDistanceAlongSpline(
-		CurrentDistance, 
-		ESplineCoordinateSpace::World
-	);
-	Owner->SetActorLocation(NewLocation);
-	FRotator NewRotation = SplineToFollow->GetRotationAtDistanceAlongSpline(
-		CurrentDistance, 
-		ESplineCoordinateSpace::World
-	);
-	Owner->SetActorRotation(NewRotation);
+	//CurrentAngle = OrbitComponent->CalculateDeltaAngle(CurrentAngle, DeltaTime, RotationSpeed, MovementDirection );
+	
+	float DeltaAngle = FMath::DegreesToRadians(RotationSpeed) * DeltaTime * MovementDirection;
+	CurrentAngle += DeltaAngle;
+	
+	CurrentAngle = FMath::Fmod(CurrentAngle, 2.0f * PI);
+	if (CurrentAngle < 0.0f)
+	{
+		CurrentAngle += 2.0f * PI;
+	}
+	
+	FVector2D NewLocation = OrbitComponent->CalculatePosition(CurrentAngle);
+	FVector TangentDirection = OrbitComponent->GetTangentDirection(CurrentAngle, MovementDirection);
+	
+	Owner->SetActorLocation(FVector(NewLocation.X, NewLocation.Y, GetOwner()->GetActorLocation().Z));
+	Owner->SetActorRotation(TangentDirection.Rotation());
 }
 
 bool UBaseMovementComponent::IsGroundAhead() const
 {
 	AActor* Owner = GetOwner();
-	if (!Owner || !SplineToFollow) return false;
+	if (!Owner) return false;
 	
-	FVector SplineDirection = GetNextDirectionFromSpline();
+	float TangentAngle = CurrentAngle + (PI / 2.0f) * MovementDirection;
+	FVector TangentDirection(FMath::Cos(TangentAngle), FMath::Sin(TangentAngle), 0.0f);
 	FVector CurrentLocation = Owner->GetActorLocation();
-	FVector TraceStart = CurrentLocation + (SplineDirection * EdgeCheckOffset);
+	FVector TraceStart = CurrentLocation + (TangentDirection * EdgeCheckOffset);
 	FVector TraceEnd = TraceStart - FVector(0.0f, 0.0f, GroundCheckDistance);
 
 	FHitResult HitResult;
@@ -78,22 +107,9 @@ bool UBaseMovementComponent::IsGroundAhead() const
 		TraceEnd,
 		bHit ? FColor::Green : FColor::Red,
 		false,
-		0.1f,
-		0,
-		1.0f
+		0.1f
 	);
 #endif
 
 	return bHit;
-}
-
-FVector UBaseMovementComponent::GetNextDirectionFromSpline() const
-{
-	if (!SplineToFollow) return FVector::ForwardVector;
-	
-	float NextDistance = CurrentDistance + (bMovingForward ? EdgeCheckOffset : -EdgeCheckOffset);
-	return SplineToFollow->GetDirectionAtDistanceAlongSpline(
-		NextDistance,
-		ESplineCoordinateSpace::World
-	).GetSafeNormal();
 }

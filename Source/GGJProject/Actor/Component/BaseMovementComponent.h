@@ -5,6 +5,7 @@
 #include "BaseMovementComponent.generated.h"
 
 class USplineComponent;
+class USuperellipseOrbitComponent;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class GGJPROJECT_API UBaseMovementComponent : public UActorComponent
@@ -19,29 +20,29 @@ protected:
 
 public:
 	
-	UPROPERTY(EditAnywhere, Category = "Patrol")
-	float PatrolDistance = 200.0f;
+	UPROPERTY(EditAnywhere, Category = "Movemement")
+	float RotationSpeed { 20.f };
 
-	UPROPERTY(EditAnywhere, Category = "Patrol")
-	float MovementSpeed = 100.0f;
-
-	UPROPERTY(EditAnywhere, Category = "Patrol")
-	USplineComponent* SplineToFollow;
+	UPROPERTY(EditAnywhere, Category = "Movement")
+	float MovementDirection { 1.0f };
 	
-	UPROPERTY(EditAnywhere, Category = "Patrol|Ground Check")
-	float GroundCheckDistance = 100.0f;
+	UPROPERTY(EditAnywhere, Category = "Movement|Ground Check")
+	float GroundCheckDistance { 100.0f };
 
-	UPROPERTY(EditAnywhere, Category = "Patrol|Ground Check")
-	float EdgeCheckOffset = 50.0f; 
+	UPROPERTY(EditAnywhere, Category = "Movement|Ground Check")
+	float EdgeCheckOffset { 50.0f };
+
 	
-	FVector StartLocation;
-	FVector CurrentDirection;
-	bool bInitialized = false;
-	float DistanceTraveled = 0.0f;
-	float CurrentDistance = 0.0f;
-	bool bMovingForward = true;
+	UPROPERTY()
+	bool bIsOrbitInitialized { false };
+	bool bDelegateRegistered { false };
+	float CurrentAngle { 0.0f };
+	UPROPERTY()
+	TObjectPtr<USuperellipseOrbitComponent> OrbitComponent;
 	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	bool IsGroundAhead() const;
-	FVector GetNextDirectionFromSpline() const;
+	UFUNCTION()
+	void OnOrbitReady();
+	
 };
