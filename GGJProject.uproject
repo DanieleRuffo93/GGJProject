@@ -12,11 +12,24 @@
 				"UMG",
 				"Engine"
 			]
+		},
+		{
+			"Name": "Niagara",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
 		}
 	],
 	"Plugins": [
 		{
 			"Name": "ModelingToolsEditorMode",
+			"Enabled": true
+		},
+		{
+			"Name": "FMODStudio",
+			"Enabled": true
+		},
+		{
+			"Name": "FMODStudioNiagara",
 			"Enabled": true
 		}
 	]

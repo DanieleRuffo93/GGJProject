@@ -35,6 +35,15 @@ ADynamicSideScrollerCharacter::ADynamicSideScrollerCharacter()
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
 	
+	feetVFX = CreateDefaultSubobject<UNiagaraComponent>(TEXT("NiagaraFeetEffect"));
+	feetVFX->SetupAttachment(GetMesh());
+	//static ConstructorHelpers::FObjectFinder<UNiagaraSystem> NiagaraEffectAsset(TEXT("NiagaraSystem'/Game/Path/To/YourNiagaraSystem.YourNiagaraSystem'"));
+	//if (NiagaraEffectAsset.Succeeded())
+	//{
+	//	NiagaraEffect->SetAsset(NiagaraEffectAsset.Object);
+	//}
+
+
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->TargetArmLength = 400.0f; 
@@ -91,6 +100,7 @@ void ADynamicSideScrollerCharacter::Jump()
 	}
 
 	Super::Jump();
+	feetVFX->Deactivate();
 
 	if (bCanJump)
 	{
@@ -218,8 +228,15 @@ void ADynamicSideScrollerCharacter::Move(const FInputActionValue& Value)
 	CurrentAngle = FMath::Atan2(DeltaY, DeltaX);
 	
 	float InputValue = Value.Get<float>();
-	if (InputValue == 0.0f) return;
-	
+	if (InputValue == 0.0f) {
+		feetVFX->Deactivate();
+		return;
+	}
+	if (GetCharacterMovement()->IsMovingOnGround())
+	{
+		feetVFX->Activate();
+	}
+
 	int8 MovementDirection = (InputValue > 0.0f) ? 1 : -1;
 	
 	CurrentAngle = OrbitComponent->CalculateDeltaAngle(CurrentAngle, GetWorld()->GetDeltaSeconds(), GetCharacterMovement()->MaxWalkSpeed, MovementDirection);
