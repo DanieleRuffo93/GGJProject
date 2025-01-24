@@ -2,12 +2,10 @@
 
 #include "GGJProjectGameMode.h"
 #include "GGJProject/Actor/Component/SuperellipseOrbitComponent.h"
-#include "UObject/ConstructorHelpers.h"
 
 AGGJProjectGameMode::AGGJProjectGameMode()
 {
 	OrbitComponent = CreateDefaultSubobject<USuperellipseOrbitComponent>(TEXT("OrbitComponent"));
-
 }
 
 void AGGJProjectGameMode::BeginPlay()

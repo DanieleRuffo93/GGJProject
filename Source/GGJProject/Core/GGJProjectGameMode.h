@@ -6,7 +6,7 @@
 
 class USuperellipseOrbitComponent;
 
-UCLASS(minimalapi)
+UCLASS(MinimalAPI)
 class AGGJProjectGameMode : public AGameModeBase
 {
 	GENERATED_BODY()

@@ -83,10 +83,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SolidBubble)
 	float SolidBubbleCooldown;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
-	bool bDrawDebug {false};
-
+	
 	TObjectPtr<USuperellipseOrbitComponent> OrbitComponent;
 
 	float CurrentAngle {0.f};

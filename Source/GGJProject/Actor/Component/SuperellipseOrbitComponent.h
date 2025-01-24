@@ -27,18 +27,23 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOrbitInitializedSignature OnOrbitInitialized;
-
+	
+	UPROPERTY(EditAnywhere, Category = "Orbit|Debug")
+	bool bDrawDebugSuperellipse {false};
+	
 	FVector CenterLocation { FVector::ZeroVector };
 	FVector2D CenterActorExtent { FVector::ZeroVector };
 	float OrbitLength {0};
 	bool bHasBeenInitialized {false};
 	
+	
 	FVector2D CalculatePosition(float Angle, float RadiusOverride = -1.f) const;
 	float CalculateDeltaAngle(float CurrentAngle, float DeltaTime, float RotationSpeed, int8 MovementDirection) const;
 	FVector GetTangentDirection(float Angle, int32 Direction) const;
+	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent);
 	void FindCenterActor();
 	void CalculateOrbitLength();
-	void DrawOrbit(float ZAxis);
+	void DrawOrbit(AActor* Actor);
 
 protected:
 	virtual void BeginPlay() override;
