@@ -94,6 +94,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CloudBubble)
 	float CloudBubbleCooldown;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = PlugBubble)
+	bool bIsPlugBubbleSpawned;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = PlugBubble)
+	float PlugBubbleCooldown;
+
 
 protected:
 

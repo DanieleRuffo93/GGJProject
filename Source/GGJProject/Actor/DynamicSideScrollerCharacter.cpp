@@ -62,6 +62,9 @@ ADynamicSideScrollerCharacter::ADynamicSideScrollerCharacter()
 
 	bIsCloudBubbleSpawned = false;
 	CloudBubbleCooldown = 1.0f;
+
+	bIsPlugBubbleSpawned = false;
+	PlugBubbleCooldown = 1.0f;
 }
 
 //////////////////////////////////////////////////////////////////////////
