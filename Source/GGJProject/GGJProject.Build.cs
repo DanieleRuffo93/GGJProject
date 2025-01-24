@@ -7,7 +7,9 @@ public class GGJProject : ModuleRules
 	public GGJProject(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
-
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput" });
+		
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "MediaAssets" });
+		
+		PrivateDependencyModuleNames.AddRange(new string[] {  "Slate", "SlateCore" });
 	}
 }
