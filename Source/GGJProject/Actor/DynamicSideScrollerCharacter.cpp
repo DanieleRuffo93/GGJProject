@@ -165,10 +165,6 @@ void ADynamicSideScrollerCharacter::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 
 	UpdateCameraPosition();
-	if(bDrawDebug)
-	{
-		OrbitComponent->DrawOrbit(GetActorLocation().Z);
-	}
 }
 
 void ADynamicSideScrollerCharacter::OnOrbitReady()
@@ -177,7 +173,6 @@ void ADynamicSideScrollerCharacter::OnOrbitReady()
 	DirectionToCurrent.Z = 0.0f;
 	CurrentAngle = FMath::Atan2(DirectionToCurrent.Y, DirectionToCurrent.X);
 	CurrentAngle = FMath::Fmod(CurrentAngle + 2.0f * PI, 2.0f * PI);
-	UE_LOG(LogTemp, Warning, TEXT("CurrentAngle %f"), CurrentAngle);
 	bIsOrbitInitialized = true;
 	UpdateCameraPosition();
 	
@@ -225,7 +220,6 @@ void ADynamicSideScrollerCharacter::MoveSpline(const FInputActionValue& Value)
 
 void ADynamicSideScrollerCharacter::Move(const FInputActionValue& Value)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Input: %f"), Value.Get<float>())
 	if (!bIsOrbitInitialized || !OrbitComponent) return;
 
 	float DeltaX = GetActorLocation().X - OrbitComponent->CenterLocation.X;

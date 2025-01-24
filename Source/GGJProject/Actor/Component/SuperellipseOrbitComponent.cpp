@@ -1,6 +1,8 @@
 #include "SuperellipseOrbitComponent.h"
 
+#include "Engine/StaticMeshActor.h"
 #include "Kismet/GameplayStatics.h"
+#include "DrawDebugHelpers.h"
 
 USuperellipseOrbitComponent::USuperellipseOrbitComponent()
 {
@@ -114,13 +116,65 @@ FVector USuperellipseOrbitComponent::GetTangentDirection(float Angle, int32 Dire
 	).GetSafeNormal();
 }
 
-void USuperellipseOrbitComponent::DrawOrbit(float ZAxis)
+void USuperellipseOrbitComponent::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+
+	AActor* Owner = GetOwner();
+	if (!IsValid(Owner) || !Owner->IsA<AStaticMeshActor>())
+	{
+		return;
+	}
+
+	if (PropertyChangedEvent.Property && PropertyChangedEvent.Property->GetFName() == GET_MEMBER_NAME_CHECKED(USuperellipseOrbitComponent, OrbitRadius))
+	{
+		if (bDrawDebugSuperellipse)
+		{
+			DrawOrbit(GetOwner());
+		}
+	}
+
+	if (PropertyChangedEvent.Property && PropertyChangedEvent.Property->GetFName() == GET_MEMBER_NAME_CHECKED(USuperellipseOrbitComponent, SuperellipseExponent))
+	{
+		if (bDrawDebugSuperellipse)
+		{
+			DrawOrbit(GetOwner());
+		}
+	}
+	
+	if (PropertyChangedEvent.Property && PropertyChangedEvent.Property->GetFName() == GET_MEMBER_NAME_CHECKED(USuperellipseOrbitComponent, bDrawDebugSuperellipse))
+	{
+		if (bDrawDebugSuperellipse)
+		{
+			DrawOrbit(GetOwner());
+		}
+		else
+		{
+			FlushDebugStrings(GetWorld());
+			FlushPersistentDebugLines(GetWorld());
+		}
+	}
+}
+
+void USuperellipseOrbitComponent::DrawOrbit(AActor*  Actor)
 
 {
-	if (!CenterActor) return;
-	
-	float DeltaAngle = 0.1f;
+	if (!IsValid(Actor) || !Actor->IsA<AStaticMeshActor>() || !bDrawDebugSuperellipse) 
+	{
+		return;
+	}
+
+	FlushDebugStrings(GetWorld());
+	FlushPersistentDebugLines(GetWorld());	
+	float DeltaAngle = 0.01f;
 	FVector2D PreviousPoint = CalculatePosition(0.0f);
+
+	CenterLocation = Actor->GetActorLocation();
+	FVector Origin, Extent;
+	Actor->GetActorBounds(true, Origin, Extent);
+	// TODO Calculate CenterLocation independently from Origin location
+	//CenterLocation = Origin + (Extent * 0.5f);
+	CenterActorExtent = FVector2D(Extent.X, Extent.Y);
 	
 	for (float Angle = DeltaAngle; Angle < 2.0f * PI; Angle += DeltaAngle)
 	{
@@ -128,20 +182,20 @@ void USuperellipseOrbitComponent::DrawOrbit(float ZAxis)
 		
 		DrawDebugLine(
 			GetWorld(),
-			FVector{ PreviousPoint.X, PreviousPoint.Y, ZAxis},
-			FVector{ CurrentPoint.X, CurrentPoint.Y, ZAxis},
+			FVector{ PreviousPoint.X, PreviousPoint.Y,Actor->GetActorLocation().Z },
+			FVector{ CurrentPoint.X, CurrentPoint.Y, Actor->GetActorLocation().Z},
 			FColor::Green,
-			false,
+			true,
 			-1.0f, 
 			0, 
 			2.0f 
 		);
 		DrawDebugPoint(
 			GetWorld(),
-			FVector{ CurrentPoint.X, CurrentPoint.Y, ZAxis},
+			FVector{ CurrentPoint.X, CurrentPoint.Y, Actor->GetActorLocation().Z},
 			10.0f,
 			FColor::Red,
-			false,
+			true,
 			-1.0f,
 			0 
 		);
