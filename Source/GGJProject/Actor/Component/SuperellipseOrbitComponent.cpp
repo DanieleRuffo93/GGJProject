@@ -126,15 +126,10 @@ void USuperellipseOrbitComponent::PostEditChangeProperty(FPropertyChangedEvent& 
 		return;
 	}
 
-	if (PropertyChangedEvent.Property && PropertyChangedEvent.Property->GetFName() == GET_MEMBER_NAME_CHECKED(USuperellipseOrbitComponent, OrbitRadius))
-	{
-		if (bDrawDebugSuperellipse)
-		{
-			DrawOrbit(GetOwner());
-		}
-	}
-
-	if (PropertyChangedEvent.Property && PropertyChangedEvent.Property->GetFName() == GET_MEMBER_NAME_CHECKED(USuperellipseOrbitComponent, SuperellipseExponent))
+	if (PropertyChangedEvent.Property && PropertyChangedEvent.Property->GetFName() == GET_MEMBER_NAME_CHECKED(USuperellipseOrbitComponent, OrbitRadius) ||
+		PropertyChangedEvent.Property && PropertyChangedEvent.Property->GetFName() == GET_MEMBER_NAME_CHECKED(USuperellipseOrbitComponent, SuperellipseExponent) ||
+		PropertyChangedEvent.Property && PropertyChangedEvent.Property->GetFName() == GET_MEMBER_NAME_CHECKED(USuperellipseOrbitComponent, DrawDebugZOffset)||
+		PropertyChangedEvent.Property && PropertyChangedEvent.Property->GetFName() == GET_MEMBER_NAME_CHECKED(USuperellipseOrbitComponent, bDrawDebugSuperellipse))
 	{
 		if (bDrawDebugSuperellipse)
 		{
@@ -182,8 +177,8 @@ void USuperellipseOrbitComponent::DrawOrbit(AActor*  Actor)
 		
 		DrawDebugLine(
 			GetWorld(),
-			FVector{ PreviousPoint.X, PreviousPoint.Y,Actor->GetActorLocation().Z },
-			FVector{ CurrentPoint.X, CurrentPoint.Y, Actor->GetActorLocation().Z},
+			FVector{ PreviousPoint.X, PreviousPoint.Y,Actor->GetActorLocation().Z + DrawDebugZOffset },
+			FVector{ CurrentPoint.X, CurrentPoint.Y, Actor->GetActorLocation().Z + DrawDebugZOffset },
 			FColor::Green,
 			true,
 			-1.0f, 
@@ -192,7 +187,7 @@ void USuperellipseOrbitComponent::DrawOrbit(AActor*  Actor)
 		);
 		DrawDebugPoint(
 			GetWorld(),
-			FVector{ CurrentPoint.X, CurrentPoint.Y, Actor->GetActorLocation().Z},
+			FVector{ CurrentPoint.X, CurrentPoint.Y, Actor->GetActorLocation().Z + DrawDebugZOffset },
 			10.0f,
 			FColor::Red,
 			true,
