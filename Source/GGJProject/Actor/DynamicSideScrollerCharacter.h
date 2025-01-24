@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
-#include "NiagaraComponent.h"
 #include "DynamicSideScrollerCharacter.generated.h"
 
 class USpringArmComponent;
@@ -13,8 +12,6 @@ class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
 class ASplinePathActor;
-class USuperellipseOrbitComponent;
-class Niagara;
 struct FInputActionValue;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogPlayerCharacter, Log, All);
@@ -44,15 +41,17 @@ class ADynamicSideScrollerCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* MoveAction;
 
+
 public:
 	ADynamicSideScrollerCharacter();
 
 	/** Spline path */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Path)
 	ASplinePathActor* SplinePath;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Effects", meta = (AllowPrivateAccess = "true"))
-	UNiagaraComponent* feetVFX;
+
+	/** Set spline path */
+	UFUNCTION(BlueprintCallable, Category = Path)
+	void SetSplinePathActor(ASplinePathActor* NewSplineActor);
 
 	/** Distance from spline */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Path)
@@ -88,27 +87,23 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SolidBubble)
 	float SolidBubbleCooldown;
-	
-	TObjectPtr<USuperellipseOrbitComponent> OrbitComponent;
 
-	float CurrentAngle {0.f};
-	bool bIsOrbitInitialized {false};
-	bool bDelegateRegistered {false};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CloudBubble)
+	bool bIsCloudBubbleSpawned;
 
-	UFUNCTION()
-	void OnOrbitReady();
-	void UpdateCameraPosition();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CloudBubble)
+	float CloudBubbleCooldown;
 
-	
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = PlugBubble)
+	bool bIsPlugBubbleSpawned;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = PlugBubble)
+	float PlugBubbleCooldown;
+
+
 protected:
 
-	virtual void BeginPlay() override;
-
-	virtual void Tick(float DeltaSeconds) override;
-
 	/** Called for movement input */
-	void MoveSpline(const FInputActionValue& Value);
 	void Move(const FInputActionValue& Value);
 
 
