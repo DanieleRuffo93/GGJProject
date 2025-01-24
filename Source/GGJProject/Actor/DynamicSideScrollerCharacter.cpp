@@ -49,6 +49,18 @@ ADynamicSideScrollerCharacter::ADynamicSideScrollerCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
+	FeetVFX = CreateDefaultSubobject<UNiagaraComponent>(TEXT("NiagaraEffect"));
+
+	// Collegarlo al root component (o un altro componente)
+	FeetVFX->SetupAttachment(GetMesh());
+
+	// Caricare l'effetto Niagara (facoltativo, se hai un asset predefinito)
+	//static ConstructorHelpers::FObjectFinder<UNiagaraSystem> NiagaraEffectAsset(TEXT("NiagaraSystem'/Game/Path/To/YourNiagaraSystem.YourNiagaraSystem'"));
+	//if (NiagaraEffectAsset.Succeeded())
+	//{
+	//	FeetVFX->SetAsset(NiagaraEffectAsset.Object);
+	//}
+
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 
@@ -111,6 +123,7 @@ void ADynamicSideScrollerCharacter::Jump()
 	}
 
 	Super::Jump();
+	FeetVFX->Deactivate();
 
 	if (bCanJump)
 	{
@@ -152,14 +165,14 @@ void ADynamicSideScrollerCharacter::Move(const FInputActionValue& Value)
 	float movement = Value.Get<float>();
 
 	if (movement > 0)
-	{
+	{	
 		movement = 1.0f;
 	}
 	else if (movement < 0)
 	{
 		movement = -1.0f;
 	}
-
+	if (movement != 0 && GetCharacterMovement()->IsMovingOnGround()) FeetVFX->Activate();
 
 	if (Controller != nullptr && SplinePath != nullptr)
 	{
