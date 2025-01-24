@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
+#include "NiagaraComponent.h"
 #include "DynamicSideScrollerCharacter.generated.h"
 
 class USpringArmComponent;
@@ -13,6 +14,7 @@ class UInputMappingContext;
 class UInputAction;
 class ASplinePathActor;
 class USuperellipseOrbitComponent;
+class Niagara;
 struct FInputActionValue;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogPlayerCharacter, Log, All);
@@ -49,6 +51,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Path)
 	ASplinePathActor* SplinePath;
 	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Effects", meta = (AllowPrivateAccess = "true"))
+	UNiagaraComponent* feetVFX;
+
 	/** Distance from spline */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Path)
 	float ScanDistance;

@@ -12,6 +12,11 @@
 				"UMG",
 				"Engine"
 			]
+		},
+		{
+			"Name": "Niagara",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
 		}
 	],
 	"Plugins": [
