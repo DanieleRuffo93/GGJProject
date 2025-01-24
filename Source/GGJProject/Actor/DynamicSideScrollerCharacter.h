@@ -14,6 +14,7 @@ class UInputMappingContext;
 class UInputAction;
 class ASplinePathActor;
 struct FInputActionValue;
+class USuperellipseOrbitComponent;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogPlayerCharacter, Log, All);
 
@@ -21,43 +22,35 @@ UCLASS(config = Game)
 class ADynamicSideScrollerCharacter : public ACharacter
 {
 	GENERATED_BODY()
-
-	/** Camera boom positioning the camera behind the character */
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* CameraBoom;
-
-	/** Follow camera */
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
-
-	/** MappingContext */
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Effects", meta = (AllowPrivateAccess = "true"))
 	UNiagaraComponent* FeetVFX;
 
-	/** Jump Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* JumpAction;
 
-	/** Move Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* MoveAction;
 
 
 public:
 	ADynamicSideScrollerCharacter();
-
-	/** Spline path */
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Path)
 	ASplinePathActor* SplinePath;
-
-	/** Set spline path */
+	
 	UFUNCTION(BlueprintCallable, Category = Path)
 	void SetSplinePathActor(ASplinePathActor* NewSplineActor);
 
-	/** Distance from spline */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Path)
 	float ScanDistance;
 
@@ -104,23 +97,33 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = PlugBubble)
 	float PlugBubbleCooldown;
 
+	TObjectPtr<USuperellipseOrbitComponent> OrbitComponent;
+
+	float CurrentAngle {0.f};
+	bool bIsOrbitInitialized {false};
+	bool bDelegateRegistered {false};
+
+	UFUNCTION()
+	void OnOrbitReady();
+	void UpdateCameraPosition();
 
 protected:
-
-	/** Called for movement input */
+	
+	virtual void Tick(float DeltaSeconds) override;
 	void Move(const FInputActionValue& Value);
+	void MoveSpline(const FInputActionValue& Value);
 
 
 protected:
+	
+	virtual void BeginPlay() override;
 
 	virtual void NotifyControllerChanged() override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 public:
-	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
-	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 };
 
