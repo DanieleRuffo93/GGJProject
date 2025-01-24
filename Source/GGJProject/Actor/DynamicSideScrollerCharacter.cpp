@@ -27,8 +27,7 @@ ADynamicSideScrollerCharacter::ADynamicSideScrollerCharacter()
 	bUseControllerRotationRoll = false;
 
 	// Configure character movement
-	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
-	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f); // ...at this rotation rate
+	GetCharacterMovement()->bOrientRotationToMovement = false; 
 
 	// Note: For faster iteration times these variables, and many more, can be tweaked in the Character Blueprint
 	// instead of recompiling to adjust them
@@ -176,6 +175,8 @@ void ADynamicSideScrollerCharacter::Move(const FInputActionValue& Value)
 		FVector RightDirection = SplinePath->Spline->FindLocationClosestToWorldLocation(TangentBasedOnMovement + GetActorLocation(), ESplineCoordinateSpace::World);
 		RightDirection -= GetActorLocation();
 		RightDirection.Normalize();
+
+		SetActorRotation(FRotator(0.0f, RightDirection.Rotation().Yaw, 0.0f));
 
 		// add movement ;
 		AddMovementInput(RightDirection, FMath::Abs(movement));
