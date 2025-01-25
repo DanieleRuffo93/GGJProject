@@ -21,6 +21,10 @@ class USuperellipseOrbitComponent;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogPlayerCharacter, Log, All);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSolidBubbleSignature);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCloudBubbleSignature);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlugBubbleSignature);
+
 UCLASS(config = Game)
 class ADynamicSideScrollerCharacter : public ACharacter
 {
@@ -112,6 +116,13 @@ public:
 	UFUNCTION()
 	void OnOrbitReady();
 	void UpdateCameraPosition();
+
+	UPROPERTY(BlueprintCallable, BlueprintAssignable)
+	FOnSolidBubbleSignature OnSolidBubbleDelegate;
+	UPROPERTY(BlueprintCallable, BlueprintAssignable)
+	FOnCloudBubbleSignature OnCloudBubbleDelegate;
+	UPROPERTY(BlueprintCallable, BlueprintAssignable)
+	FOnPlugBubbleSignature OnPlugBubbleDelegate;
 
 
 protected:
