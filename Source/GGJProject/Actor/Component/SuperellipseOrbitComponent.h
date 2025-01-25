@@ -49,6 +49,9 @@ public:
 	void CalculateOrbitLength();
 	void DrawOrbit(AActor* Actor);
 
+	UFUNCTION(BlueprintCallable)
+	void GetCenterAndSqrRadius(FVector& Center, float& SqrRadius);
+
 protected:
 	virtual void BeginPlay() override;
 

@@ -98,6 +98,7 @@ void ADynamicSideScrollerCharacter::SetupPlayerInputComponent(UInputComponent* P
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ADynamicSideScrollerCharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ADynamicSideScrollerCharacter::Move);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, this, &ADynamicSideScrollerCharacter::DespawnFeetVFX);
 	}
 	else
 	{
@@ -139,7 +140,7 @@ void ADynamicSideScrollerCharacter::Jump()
 	}
 
 	Super::Jump();
-	FeetVFX->Deactivate();
+	DespawnFeetVFX();
 
 	if (bCanJump)
 	{
@@ -189,16 +190,16 @@ void ADynamicSideScrollerCharacter::OnOrbitReady()
 void ADynamicSideScrollerCharacter::MoveSpline(const FInputActionValue& Value)
 {
 	float movement = Value.Get<float>();
-
-	if (movement > 0)
-	{	
-		movement = 1.0f;
-	}
-	else if (movement < 0)
-	{
-		movement = -1.0f;
-	}
-	if (movement != 0 && GetCharacterMovement()->IsMovingOnGround()) FeetVFX->Activate();
+	movement = FMath::Sign(movement);
+	//if (movement > 0)
+	//{	
+	//	movement = 1.0f;
+	//}
+	//else if (movement < 0)
+	//{
+	//	movement = -1.0f;
+	//}
+	if (movement != 0 && GetCharacterMovement()->IsMovingOnGround()) SpawnFeetVFX();
 
 	if (Controller != nullptr && SplinePath != nullptr)
 	{
@@ -236,12 +237,12 @@ void ADynamicSideScrollerCharacter::Move(const FInputActionValue& Value)
 	
 	float InputValue = Value.Get<float>();
 	if (InputValue == 0.0f && IsValid(FeetVFX)) {
-		FeetVFX->Deactivate();
+		DespawnFeetVFX();
 		return;
 	}
 	if (GetCharacterMovement()->IsMovingOnGround() and IsValid(FeetVFX))
 	{
-		FeetVFX->Activate();
+		SpawnFeetVFX();
 	}
 
 	int8 MovementDirection = (InputValue > 0.0f) ? 1 : -1;
