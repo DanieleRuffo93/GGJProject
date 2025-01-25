@@ -30,6 +30,10 @@ public:
 	
 	UPROPERTY(EditAnywhere, Category = "Orbit|Debug")
 	bool bDrawDebugSuperellipse {false};
+
+	UPROPERTY(EditAnywhere, Category = "Orbit|Debug")
+	float DrawDebugZOffset {0.0f};
+	
 	
 	FVector CenterLocation { FVector::ZeroVector };
 	FVector2D CenterActorExtent { FVector::ZeroVector };

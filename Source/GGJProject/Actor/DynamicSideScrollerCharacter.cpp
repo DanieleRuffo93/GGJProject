@@ -1,3 +1,5 @@
+// Copyright Epic Games, Inc. All Rights Reserved.
+
 #include "DynamicSideScrollerCharacter.h"
 #include "Engine/LocalPlayer.h"
 #include "Camera/CameraComponent.h"
@@ -35,25 +37,25 @@ ADynamicSideScrollerCharacter::ADynamicSideScrollerCharacter()
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
 	
-	feetVFX = CreateDefaultSubobject<UNiagaraComponent>(TEXT("NiagaraFeetEffect"));
-	feetVFX->SetupAttachment(GetMesh());
+	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
+	CameraBoom->SetupAttachment(RootComponent);
+	CameraBoom->TargetArmLength = 400.0f;
+	CameraBoom->bUsePawnControlRotation = false;
+
+	// Create a follow camera
+	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
+	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); 
+	FollowCamera->bUsePawnControlRotation = false; 
+
+	FeetVFX = CreateDefaultSubobject<UNiagaraComponent>(TEXT("NiagaraEffect"));
+	FeetVFX->SetupAttachment(GetMesh());
+
+	// Caricare l'effetto Niagara (facoltativo, se hai un asset predefinito)
 	//static ConstructorHelpers::FObjectFinder<UNiagaraSystem> NiagaraEffectAsset(TEXT("NiagaraSystem'/Game/Path/To/YourNiagaraSystem.YourNiagaraSystem'"));
 	//if (NiagaraEffectAsset.Succeeded())
 	//{
-	//	NiagaraEffect->SetAsset(NiagaraEffectAsset.Object);
+	//	FeetVFX->SetAsset(NiagaraEffectAsset.Object);
 	//}
-
-
-	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
-	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 400.0f; 
-	CameraBoom->bUsePawnControlRotation = false; 
-	
-	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
-	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
-	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
-
-	
 	ScanDistance = 250.0f;
 	bCanJump = false;
 
@@ -61,6 +63,19 @@ ADynamicSideScrollerCharacter::ADynamicSideScrollerCharacter()
 
 	bIsSolidBubbleSpawned = false;
 	SolidBubbleCooldown = 1.0f;
+
+	bIsCloudBubbleSpawned = false;
+	CloudBubbleCooldown = 1.0f;
+
+	bIsPlugBubbleSpawned = false;
+	PlugBubbleCooldown = 1.0f;
+}
+
+void ADynamicSideScrollerCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	UpdateCameraPosition();
 }
 
 void ADynamicSideScrollerCharacter::NotifyControllerChanged()
@@ -82,12 +97,36 @@ void ADynamicSideScrollerCharacter::SetupPlayerInputComponent(UInputComponent* P
 		
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ADynamicSideScrollerCharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
-		
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ADynamicSideScrollerCharacter::Move);
 	}
 	else
 	{
 		UE_LOG(LogPlayerCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
+	}
+}
+
+void ADynamicSideScrollerCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	AGameModeBase* GameMode = UGameplayStatics::GetGameMode(this);
+	if (GameMode)
+	{
+		USuperellipseOrbitComponent* OrbitComp = GameMode->FindComponentByClass<USuperellipseOrbitComponent>();
+		if (OrbitComp)
+		{
+			OrbitComponent = OrbitComp;
+			if (OrbitComponent->bHasBeenInitialized)
+			{
+				OnOrbitReady();
+			}
+			else
+				if (!bDelegateRegistered)
+				{
+					OrbitComponent->OnOrbitInitialized.AddDynamic(this, &ADynamicSideScrollerCharacter::OnOrbitReady);
+					bDelegateRegistered = true;
+				}
+		}
 	}
 }
 
@@ -100,7 +139,7 @@ void ADynamicSideScrollerCharacter::Jump()
 	}
 
 	Super::Jump();
-	feetVFX->Deactivate();
+	FeetVFX->Deactivate();
 
 	if (bCanJump)
 	{
@@ -135,38 +174,6 @@ void ADynamicSideScrollerCharacter::Landed(const FHitResult& Hit)
 
 }
 
-void ADynamicSideScrollerCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-
-	AGameModeBase* GameMode = UGameplayStatics::GetGameMode(this);
-	if (GameMode)
-	{
-		USuperellipseOrbitComponent* OrbitComp = GameMode->FindComponentByClass<USuperellipseOrbitComponent>();
-		if (OrbitComp)
-		{
-			OrbitComponent = OrbitComp;
-			if (OrbitComponent->bHasBeenInitialized)
-			{
-				OnOrbitReady();
-			}
-			else
-				if (!bDelegateRegistered)
-				{
-					OrbitComponent->OnOrbitInitialized.AddDynamic(this, &ADynamicSideScrollerCharacter::OnOrbitReady);
-					bDelegateRegistered = true;
-				}
-		}
-	}
-}
-
-void ADynamicSideScrollerCharacter::Tick(float DeltaSeconds)
-{
-	Super::Tick(DeltaSeconds);
-
-	UpdateCameraPosition();
-}
-
 void ADynamicSideScrollerCharacter::OnOrbitReady()
 {
 	FVector DirectionToCurrent = GetActorLocation() - OrbitComponent->CenterLocation;
@@ -178,21 +185,20 @@ void ADynamicSideScrollerCharacter::OnOrbitReady()
 	
 }
 
+
 void ADynamicSideScrollerCharacter::MoveSpline(const FInputActionValue& Value)
 {
-	// input is a float
-
 	float movement = Value.Get<float>();
 
 	if (movement > 0)
-	{
+	{	
 		movement = 1.0f;
 	}
 	else if (movement < 0)
 	{
 		movement = -1.0f;
 	}
-
+	if (movement != 0 && GetCharacterMovement()->IsMovingOnGround()) FeetVFX->Activate();
 
 	if (Controller != nullptr && SplinePath != nullptr)
 	{
@@ -212,11 +218,12 @@ void ADynamicSideScrollerCharacter::MoveSpline(const FInputActionValue& Value)
 		RightDirection -= GetActorLocation();
 		RightDirection.Normalize();
 
+		SetActorRotation(FRotator(0.0f, RightDirection.Rotation().Yaw, 0.0f));
+
 		// add movement ;
 		AddMovementInput(RightDirection, FMath::Abs(movement));
 	}
 }
-
 
 void ADynamicSideScrollerCharacter::Move(const FInputActionValue& Value)
 {
@@ -228,17 +235,17 @@ void ADynamicSideScrollerCharacter::Move(const FInputActionValue& Value)
 	CurrentAngle = FMath::Atan2(DeltaY, DeltaX);
 	
 	float InputValue = Value.Get<float>();
-	if (InputValue == 0.0f) {
-		feetVFX->Deactivate();
+	if (InputValue == 0.0f && IsValid(FeetVFX)) {
+		FeetVFX->Deactivate();
 		return;
 	}
-	if (GetCharacterMovement()->IsMovingOnGround())
+	if (GetCharacterMovement()->IsMovingOnGround() and IsValid(FeetVFX))
 	{
-		feetVFX->Activate();
+		FeetVFX->Activate();
 	}
 
 	int8 MovementDirection = (InputValue > 0.0f) ? 1 : -1;
-	
+	UE_LOG(LogTemp, Warning, TEXT("MovementDirection: %d"), MovementDirection);
 	CurrentAngle = OrbitComponent->CalculateDeltaAngle(CurrentAngle, GetWorld()->GetDeltaSeconds(), GetCharacterMovement()->MaxWalkSpeed, MovementDirection);
 	
 	FVector2D NextPosition2D = OrbitComponent->CalculatePosition(CurrentAngle);
@@ -248,6 +255,17 @@ void ADynamicSideScrollerCharacter::Move(const FInputActionValue& Value)
 	
 	AddMovementInput(MovementDirectionVector);
 	
+}
+
+
+void ADynamicSideScrollerCharacter::SetSplinePathActor(ASplinePathActor* NewSplinePathActor)
+{
+	if (IsValid(NewSplinePathActor) && NewSplinePathActor != SplinePath) //Check if new actor is valid and not the current
+	{
+		SplinePath = NewSplinePathActor;
+		return;
+	}
+	UE_LOG(LogPlayerCharacter, Warning, TEXT("Spline Path not assigned or already present."));
 }
 
 void ADynamicSideScrollerCharacter::UpdateCameraPosition()
