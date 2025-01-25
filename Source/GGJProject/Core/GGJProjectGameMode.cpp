@@ -25,6 +25,14 @@ void AGGJProjectGameMode::BeginPlay()
 			GameHUD->AddToViewport();
 		}
 	}
+
+	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+
+	if (PlayerController)
+	{
+		PlayerController->bShowMouseCursor = false;
+		PlayerController->SetInputMode(FInputModeGameOnly());
+	}
 	
 
 }
@@ -66,11 +74,14 @@ void AGGJProjectGameMode::ResumeGame()
 void AGGJProjectGameMode::QuitGame()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Inside Quit!!") );
+	
 	if (IsValid(PauseWidget))
 	{
 		PauseWidget->RemoveFromParent();
 	}
-	if (LevelToLoad.IsValid() || LevelToLoad.IsPending())
+	bool bIsLevelValid { LevelToLoad.IsValid() };
+	bool bIsLevelPending { LevelToLoad.IsPending() };
+	if ( bIsLevelValid || bIsLevelPending )
 	{
 		FString LevelName = LevelToLoad.GetAssetName();
 		UE_LOG(LogTemp, Warning, TEXT("Loading Level: %s"), *LevelName);
