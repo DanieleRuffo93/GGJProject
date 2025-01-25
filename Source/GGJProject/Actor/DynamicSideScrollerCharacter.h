@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "NiagaraComponent.h"
+
+
 #include "DynamicSideScrollerCharacter.generated.h"
 
 class UHoverButtonWidget;
@@ -111,6 +113,7 @@ public:
 	void OnOrbitReady();
 	void UpdateCameraPosition();
 
+
 protected:
 	
 	virtual void Tick(float DeltaSeconds) override;
@@ -118,6 +121,10 @@ protected:
 	void MoveSpline(const FInputActionValue& Value);
 	void PauseMenu(const FInputActionValue& Value);
 
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "VFX")
+	void SpawnFeetVFX();
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "VFX")
+	void DespawnFeetVFX();
 
 protected:
 	

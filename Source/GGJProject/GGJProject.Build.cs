@@ -8,7 +8,7 @@ public class GGJProject : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "MediaAssets", "Niagara" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "MediaAssets", "Niagara", "FMODStudio" });
 		
 		PrivateDependencyModuleNames.AddRange(new string[] {  "Slate", "SlateCore" });
 
