@@ -48,6 +48,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Media")
 	TObjectPtr<UMediaSource> FileMediaSource;
 
+	UPROPERTY(BlueprintReadWrite, Category = "Parent Widget", meta = (ExposeOnSpawn = "true"))
+	TObjectPtr<UUserWidget> ParentWidget;
+
 private:
 	UFUNCTION()
 	void OnButtonHovered();

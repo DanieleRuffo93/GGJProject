@@ -15,6 +15,12 @@ class AGGJProjectGameMode : public AGameModeBase
 protected:
 	virtual void BeginPlay() override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu", meta = (AllowPrivateAccess = "true", AllowedClasses = "World"))
+	TSoftObjectPtr<UWorld> LevelToLoad;
+
+
+
+
 public:
 	AGGJProjectGameMode();
 
@@ -24,6 +30,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Pause")
 	void ResumeGame();
 
+	UFUNCTION(BlueprintCallable, Category = "Pause")
+	void QuitGame();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Widget)
+	TSubclassOf<UUserWidget> PauseMenuWidgetClass;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UUserWidget> PauseWidget;
+
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UUserWidget> GameHUDClass;
@@ -31,6 +45,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Orbit", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USuperellipseOrbitComponent> OrbitComponent;
 
+	
+
+	
 };
 
 

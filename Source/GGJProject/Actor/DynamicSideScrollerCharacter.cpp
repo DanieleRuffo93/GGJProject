@@ -241,32 +241,14 @@ void ADynamicSideScrollerCharacter::PauseMenu(const FInputActionValue& Value)
 	UE_LOG(LogTemp, Warning, TEXT("PauseMenu") );
 	bIsPauseMenuVisible = !bIsPauseMenuVisible;
 
-	if (!bIsPauseMenuVisible)
+	AGGJProjectGameMode* GameMode{ Cast<AGGJProjectGameMode>(GetWorld()->GetAuthGameMode())};
+	if (!IsValid(GameMode))
 	{
-		if (IsValid(HoverButtonWidget))
-		{
-			HoverButtonWidget->RemoveFromParent();
-			AGGJProjectGameMode* GameMode{ Cast<AGGJProjectGameMode>(GetWorld()->GetAuthGameMode())};
-			if (IsValid(GameMode))
-			{
-				GameMode->ResumeGame();
-			}
-		}
-		// todo logic to destroy widget
 		return;
 	}
 
-	HoverButtonWidget = CreateWidget<UHoverButtonWidget>(GetWorld(), PauseMenuWidgetClass);
-	if (IsValid(HoverButtonWidget))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Creating widget") );
-		HoverButtonWidget->AddToViewport();
-		AGGJProjectGameMode* GameMode{ Cast<AGGJProjectGameMode>(GetWorld()->GetAuthGameMode())};
-		if (IsValid(GameMode))
-		{
-			GameMode->PauseGame();
-		}
-	}
+	bIsPauseMenuVisible ? GameMode->PauseGame() : GameMode->ResumeGame();
+	
 }
 
 void ADynamicSideScrollerCharacter::Move(const FInputActionValue& Value)
