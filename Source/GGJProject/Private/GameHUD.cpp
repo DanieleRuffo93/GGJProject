@@ -5,6 +5,7 @@
 
 #include "AbilityIcon.h"
 #include "Components/Image.h"
+#include "GGJProject/Actor/DynamicSideScrollerCharacter.h"
 #include "GGJProject/Actor/GGJProjectCharacter.h"
 
 
@@ -12,7 +13,7 @@ void UGameHUD::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	Character = Cast<AGGJProjectCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	Character = Cast<ADynamicSideScrollerCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (IsValid(Character))
 	{
 		if (!bIsAlreadyInitialized)

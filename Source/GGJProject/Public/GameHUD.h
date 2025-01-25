@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "GameHUD.generated.h"
 
+class ADynamicSideScrollerCharacter;
 class AGGJProjectCharacter;
 class UAbilityIcon;
 /**
@@ -36,7 +37,7 @@ protected:
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess=true), Category = "HUD")
-	TObjectPtr<AGGJProjectCharacter> Character;
+	TObjectPtr<ADynamicSideScrollerCharacter> Character;
 
 	bool bIsAlreadyInitialized {false};
 	

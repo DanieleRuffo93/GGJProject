@@ -1,5 +1,3 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -7,8 +5,9 @@
 #include "GGJProjectGameMode.generated.h"
 
 class UGameHUD;
+class USuperellipseOrbitComponent;
 
-UCLASS(minimalapi)
+UCLASS(MinimalAPI)
 class AGGJProjectGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
@@ -28,6 +27,10 @@ public:
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UUserWidget> GameHUDClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Orbit", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<USuperellipseOrbitComponent> OrbitComponent;
+
 };
 
 

@@ -7,6 +7,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
+#include "GGJProject/Actor/Component/SuperellipseOrbitComponent.h"
 
 
 void AGGJProjectGameMode::BeginPlay()
@@ -22,30 +23,17 @@ void AGGJProjectGameMode::BeginPlay()
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Here3") );
 			GameHUD->AddToViewport();
-			// GameHUD->InitializeHUD(); // Configurazione iniziale
 		}
 	}
 	
-		/*
-	UE_LOG(LogTemp, Warning, TEXT("Here") );
-	if (GameHUDClass)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Here2") );
-		UAbilityIcon* GameHUD{ CreateWidget<UAbilityIcon>(GetWorld(), GameHUDClass)};
-		if (GameHUD)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Here3") );
-			GameHUD->AddToViewport();
-			// GameHUD->InitializeHUD(); // Configurazione iniziale
-		}
-	}
-	*/
+
 }
 
 AGGJProjectGameMode::AGGJProjectGameMode()
 {
-	
+	OrbitComponent = CreateDefaultSubobject<USuperellipseOrbitComponent>(TEXT("OrbitComponent"));
 }
+
 
 void AGGJProjectGameMode::PauseGame()
 {
@@ -72,3 +60,4 @@ void AGGJProjectGameMode::ResumeGame()
 		PlayerController->SetInputMode(FInputModeGameOnly());
 	}
 }
+
