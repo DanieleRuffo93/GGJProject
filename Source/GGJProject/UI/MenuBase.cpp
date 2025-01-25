@@ -7,22 +7,15 @@ bool UMenuBase::Initialize()
 {
     Super::Initialize();
 
-    if (PlayButton)
-        PlayButton->OnClicked.AddDynamic(this, &UMenuBase::OnPlayClicked);
-
-    if (OptionsButton)
-        OptionsButton->OnClicked.AddDynamic(this, &UMenuBase::OnOptionsClicked);
-
-    if (ExitButton)
-        ExitButton->OnClicked.AddDynamic(this, &UMenuBase::OnExitClicked);
-
     return true;
 }
 
 void UMenuBase::OnPlayClicked()
 {
     UE_LOG(LogTemp, Warning, TEXT("Play Button Clicked"));
-    if (LevelToLoad.IsValid() || LevelToLoad.IsPending())
+    bool bIsLevelValid { LevelToLoad.IsValid() };
+    bool bIsLevelPending { LevelToLoad.IsPending() };
+    if ( bIsLevelValid || bIsLevelPending )
     {
         FString LevelName = LevelToLoad.GetAssetName();
         UE_LOG(LogTemp, Warning, TEXT("Loading Level: %s"), *LevelName);
@@ -34,11 +27,6 @@ void UMenuBase::OnPlayClicked()
     }
 }
 
-void UMenuBase::OnOptionsClicked()
-{
-    UE_LOG(LogTemp, Warning, TEXT("Options Button Clicked"));
-    // Logic to open options
-}
 
 void UMenuBase::OnExitClicked()
 {

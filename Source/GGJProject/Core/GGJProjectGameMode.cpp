@@ -25,6 +25,14 @@ void AGGJProjectGameMode::BeginPlay()
 			GameHUD->AddToViewport();
 		}
 	}
+
+	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+
+	if (PlayerController)
+	{
+		PlayerController->bShowMouseCursor = false;
+		PlayerController->SetInputMode(FInputModeGameOnly());
+	}
 	
 
 }
@@ -40,10 +48,11 @@ void AGGJProjectGameMode::PauseGame()
 	UGameplayStatics::SetGamePaused(GetWorld(), true);
 	
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-	if (PlayerController)
+	PauseWidget = CreateWidget<UUserWidget>(GetWorld(), PauseMenuWidgetClass);
+	if (PlayerController && IsValid(PauseWidget))
 	{
+		PauseWidget->AddToViewport();
 		PlayerController->bShowMouseCursor = true;
-		
 		PlayerController->SetInputMode(FInputModeUIOnly());
 	}
 }
@@ -53,11 +62,36 @@ void AGGJProjectGameMode::ResumeGame()
 	UGameplayStatics::SetGamePaused(GetWorld(), false);
 	
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-	if (PlayerController)
+
+	if (PlayerController && IsValid(PauseWidget))
 	{
+		PauseWidget->RemoveFromParent();
 		PlayerController->bShowMouseCursor = false;
-		
 		PlayerController->SetInputMode(FInputModeGameOnly());
 	}
 }
+
+void AGGJProjectGameMode::QuitGame()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Inside Quit!!") );
+	
+	if (IsValid(PauseWidget))
+	{
+		PauseWidget->RemoveFromParent();
+	}
+	bool bIsLevelValid { LevelToLoad.IsValid() };
+	bool bIsLevelPending { LevelToLoad.IsPending() };
+	if ( bIsLevelValid || bIsLevelPending )
+	{
+		FString LevelName = LevelToLoad.GetAssetName();
+		UE_LOG(LogTemp, Warning, TEXT("Loading Level: %s"), *LevelName);
+		UGameplayStatics::OpenLevel(this, FName(*LevelName));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("LevelToLoad is not set!"));
+	}
+}
+
+
 

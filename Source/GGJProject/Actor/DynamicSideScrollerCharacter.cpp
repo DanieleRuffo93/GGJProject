@@ -79,6 +79,7 @@ void ADynamicSideScrollerCharacter::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 
 	UpdateCameraPosition();
+
 }
 
 void ADynamicSideScrollerCharacter::NotifyControllerChanged()
@@ -109,6 +110,8 @@ void ADynamicSideScrollerCharacter::SetupPlayerInputComponent(UInputComponent* P
 		UE_LOG(LogPlayerCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
 }
+
+
 
 void ADynamicSideScrollerCharacter::BeginPlay()
 {
@@ -142,8 +145,9 @@ void ADynamicSideScrollerCharacter::Jump()
 		BufferJump();
 		return;
 	}
-
+	
 	Super::Jump();
+
 	DespawnFeetVFX();
 
 	if (bCanJump)
@@ -176,6 +180,8 @@ void ADynamicSideScrollerCharacter::OnUnbufferedJump_Implementation()
 void ADynamicSideScrollerCharacter::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
+
+
 
 }
 
@@ -235,32 +241,14 @@ void ADynamicSideScrollerCharacter::PauseMenu(const FInputActionValue& Value)
 	UE_LOG(LogTemp, Warning, TEXT("PauseMenu") );
 	bIsPauseMenuVisible = !bIsPauseMenuVisible;
 
-	if (!bIsPauseMenuVisible)
+	AGGJProjectGameMode* GameMode{ Cast<AGGJProjectGameMode>(GetWorld()->GetAuthGameMode())};
+	if (!IsValid(GameMode))
 	{
-		if (IsValid(HoverButtonWidget))
-		{
-			HoverButtonWidget->RemoveFromParent();
-			AGGJProjectGameMode* GameMode{ Cast<AGGJProjectGameMode>(GetWorld()->GetAuthGameMode())};
-			if (IsValid(GameMode))
-			{
-				GameMode->ResumeGame();
-			}
-		}
-		// todo logic to destroy widget
 		return;
 	}
 
-	HoverButtonWidget = CreateWidget<UHoverButtonWidget>(GetWorld(), PauseMenuWidgetClass);
-	if (IsValid(HoverButtonWidget))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Creating widget") );
-		HoverButtonWidget->AddToViewport();
-		AGGJProjectGameMode* GameMode{ Cast<AGGJProjectGameMode>(GetWorld()->GetAuthGameMode())};
-		if (IsValid(GameMode))
-		{
-			GameMode->PauseGame();
-		}
-	}
+	bIsPauseMenuVisible ? GameMode->PauseGame() : GameMode->ResumeGame();
+	
 }
 
 void ADynamicSideScrollerCharacter::Move(const FInputActionValue& Value)

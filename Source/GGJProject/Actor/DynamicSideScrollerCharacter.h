@@ -152,10 +152,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Widget)
 	TSubclassOf<UUserWidget> PauseMenuWidgetClass;
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UHoverButtonWidget> HoverButtonWidget;
+	TObjectPtr<UUserWidget> PauseWidget;
 
 private:
 	UPROPERTY(VisibleAnywhere)
 	bool bIsPauseMenuVisible{ false };
+	
+	
+
+	
 };
 

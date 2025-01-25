@@ -3,7 +3,6 @@
 
 #include "HoverButtonWidget.h"
 #include "Components/Button.h"
-#include "Components/TextBlock.h"
 #include "MediaPlayer.h"
 #include "MediaTexture.h"
 #include "Components/Border.h"
@@ -17,6 +16,7 @@ void UHoverButtonWidget::NativeConstruct()
 	{
 		HoverButton->OnHovered.AddDynamic(this, &UHoverButtonWidget::OnButtonHovered);
 		HoverButton->OnUnhovered.AddDynamic(this, &UHoverButtonWidget::OnButtonUnhovered);
+		
 	}
 
 	
