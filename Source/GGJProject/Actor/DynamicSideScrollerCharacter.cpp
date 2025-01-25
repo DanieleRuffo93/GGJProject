@@ -9,11 +9,14 @@
 #include "GameFramework/Controller.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "HoverButtonWidget.h"
 #include "InputActionValue.h"
+#include "Blueprint/UserWidget.h"
 #include "Component/SuperellipseOrbitComponent.h"
 #include "GGJProject/Public/Actor/SplinePathActor.h"
 #include "Components/SplineComponent.h"
 #include "GameFramework/GameModeBase.h"
+#include "GGJProject/Core/GGJProjectGameMode.h"
 #include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY(LogPlayerCharacter);
@@ -61,13 +64,13 @@ ADynamicSideScrollerCharacter::ADynamicSideScrollerCharacter()
 
 	bBufferedJump = false;
 
-	bIsSolidBubbleSpawned = false;
+	bIsSolidBubbleSpawned = true;
 	SolidBubbleCooldown = 1.0f;
 
-	bIsCloudBubbleSpawned = false;
+	bIsCloudBubbleSpawned = true;
 	CloudBubbleCooldown = 1.0f;
 
-	bIsPlugBubbleSpawned = false;
+	bIsPlugBubbleSpawned = true;
 	PlugBubbleCooldown = 1.0f;
 }
 
@@ -99,6 +102,7 @@ void ADynamicSideScrollerCharacter::SetupPlayerInputComponent(UInputComponent* P
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ADynamicSideScrollerCharacter::Move);
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, this, &ADynamicSideScrollerCharacter::DespawnFeetVFX);
+		EnhancedInputComponent->BindAction(PauseMenuAction, ETriggerEvent::Started, this, &ADynamicSideScrollerCharacter::PauseMenu);
 	}
 	else
 	{
@@ -223,6 +227,39 @@ void ADynamicSideScrollerCharacter::MoveSpline(const FInputActionValue& Value)
 
 		// add movement ;
 		AddMovementInput(RightDirection, FMath::Abs(movement));
+	}
+}
+
+void ADynamicSideScrollerCharacter::PauseMenu(const FInputActionValue& Value)
+{
+	UE_LOG(LogTemp, Warning, TEXT("PauseMenu") );
+	bIsPauseMenuVisible = !bIsPauseMenuVisible;
+
+	if (!bIsPauseMenuVisible)
+	{
+		if (IsValid(HoverButtonWidget))
+		{
+			HoverButtonWidget->RemoveFromParent();
+			AGGJProjectGameMode* GameMode{ Cast<AGGJProjectGameMode>(GetWorld()->GetAuthGameMode())};
+			if (IsValid(GameMode))
+			{
+				GameMode->ResumeGame();
+			}
+		}
+		// todo logic to destroy widget
+		return;
+	}
+
+	HoverButtonWidget = CreateWidget<UHoverButtonWidget>(GetWorld(), PauseMenuWidgetClass);
+	if (IsValid(HoverButtonWidget))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Creating widget") );
+		HoverButtonWidget->AddToViewport();
+		AGGJProjectGameMode* GameMode{ Cast<AGGJProjectGameMode>(GetWorld()->GetAuthGameMode())};
+		if (IsValid(GameMode))
+		{
+			GameMode->PauseGame();
+		}
 	}
 }
 

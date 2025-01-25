@@ -10,6 +10,7 @@
 
 #include "DynamicSideScrollerCharacter.generated.h"
 
+class UHoverButtonWidget;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
@@ -19,6 +20,10 @@ struct FInputActionValue;
 class USuperellipseOrbitComponent;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogPlayerCharacter, Log, All);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSolidBubbleSignature);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCloudBubbleSignature);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlugBubbleSignature);
 
 UCLASS(config = Game)
 class ADynamicSideScrollerCharacter : public ACharacter
@@ -42,6 +47,9 @@ class ADynamicSideScrollerCharacter : public ACharacter
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* MoveAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* PauseMenuAction;
 
 
 public:
@@ -109,12 +117,20 @@ public:
 	void OnOrbitReady();
 	void UpdateCameraPosition();
 
+	UPROPERTY(BlueprintCallable, BlueprintAssignable)
+	FOnSolidBubbleSignature OnSolidBubbleDelegate;
+	UPROPERTY(BlueprintCallable, BlueprintAssignable)
+	FOnCloudBubbleSignature OnCloudBubbleDelegate;
+	UPROPERTY(BlueprintCallable, BlueprintAssignable)
+	FOnPlugBubbleSignature OnPlugBubbleDelegate;
+
 
 protected:
 	
 	virtual void Tick(float DeltaSeconds) override;
 	void Move(const FInputActionValue& Value);
 	void MoveSpline(const FInputActionValue& Value);
+	void PauseMenu(const FInputActionValue& Value);
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "VFX")
 	void SpawnFeetVFX();
@@ -132,5 +148,14 @@ protected:
 public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Widget)
+	TSubclassOf<UUserWidget> PauseMenuWidgetClass;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UHoverButtonWidget> HoverButtonWidget;
+
+private:
+	UPROPERTY(VisibleAnywhere)
+	bool bIsPauseMenuVisible{ false };
 };
 
