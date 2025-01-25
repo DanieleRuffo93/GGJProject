@@ -157,5 +157,9 @@ public:
 private:
 	UPROPERTY(VisibleAnywhere)
 	bool bIsPauseMenuVisible{ false };
+	
+	
+
+	
 };
 

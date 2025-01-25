@@ -79,6 +79,7 @@ void ADynamicSideScrollerCharacter::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 
 	UpdateCameraPosition();
+
 }
 
 void ADynamicSideScrollerCharacter::NotifyControllerChanged()
@@ -109,6 +110,8 @@ void ADynamicSideScrollerCharacter::SetupPlayerInputComponent(UInputComponent* P
 		UE_LOG(LogPlayerCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
 }
+
+
 
 void ADynamicSideScrollerCharacter::BeginPlay()
 {
@@ -142,8 +145,9 @@ void ADynamicSideScrollerCharacter::Jump()
 		BufferJump();
 		return;
 	}
-
+	
 	Super::Jump();
+
 	DespawnFeetVFX();
 
 	if (bCanJump)
@@ -176,6 +180,8 @@ void ADynamicSideScrollerCharacter::OnUnbufferedJump_Implementation()
 void ADynamicSideScrollerCharacter::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
+
+
 
 }
 
