@@ -115,6 +115,16 @@ FVector USuperellipseOrbitComponent::GetTangentDirection(float Angle, int32 Dire
 		0.0f
 	).GetSafeNormal();
 }
+void USuperellipseOrbitComponent::GetCenterAndSqrRadius(FVector& Center, float& SqrRadius)
+{
+	if (CenterActor.Get())
+	{
+		Center = CenterActor.Get()->GetActorLocation();
+	}
+
+	SqrRadius = CalculatePosition(0).Length();
+}
+
 
 void USuperellipseOrbitComponent::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
