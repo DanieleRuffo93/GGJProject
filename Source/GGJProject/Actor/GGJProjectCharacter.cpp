@@ -8,7 +8,9 @@
 #include "GameFramework/Controller.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "HoverButtonWidget.h"
 #include "InputActionValue.h"
+#include "GGJProject/Core/GGJProjectGameMode.h"
 #include "Camera/CameraComponent.h"
 #include "Component/SuperellipseOrbitComponent.h"
 #include "GameFramework/GameModeBase.h"
@@ -100,6 +102,13 @@ void AGGJProjectCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AGGJProjectCharacter::Move);
+		
+
+		// Looking
+		EnhancedInputComponent->BindAction(PauseMenuAction, ETriggerEvent::Started, this, &AGGJProjectCharacter::PauseMenu);
+
+		// Looking
+		EnhancedInputComponent->BindAction(CooldownTestAction, ETriggerEvent::Started, this, &AGGJProjectCharacter::CooldownTest);
 	}
 	else
 	{
@@ -140,4 +149,44 @@ void AGGJProjectCharacter::UpdateCameraPosition()
 		FRotator LookAtCenterRotation = DirectionToCenterOfOrbit.Rotation();
 		CameraBoom->SetWorldRotation(LookAtCenterRotation);
 	}
+}
+
+void AGGJProjectCharacter::PauseMenu(const FInputActionValue& Value)
+{
+	UE_LOG(LogTemp, Warning, TEXT("PauseMenu") );
+	bIsPauseMenuVisible = !bIsPauseMenuVisible;
+
+	if (!bIsPauseMenuVisible)
+	{
+		if (IsValid(HoverButtonWidget))
+		{
+			HoverButtonWidget->RemoveFromParent();
+			AGGJProjectGameMode* GameMode{ Cast<AGGJProjectGameMode>(GetWorld()->GetAuthGameMode())};
+			if (IsValid(GameMode))
+			{
+				GameMode->ResumeGame();
+			}
+		}
+		// todo logic to destroy widget
+		return;
+	}
+
+	HoverButtonWidget = CreateWidget<UHoverButtonWidget>(GetWorld(), PauseMenuWidgetClass);
+	if (IsValid(HoverButtonWidget))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Creating widget") );
+		HoverButtonWidget->AddToViewport();
+		AGGJProjectGameMode* GameMode{ Cast<AGGJProjectGameMode>(GetWorld()->GetAuthGameMode())};
+		if (IsValid(GameMode))
+		{
+			GameMode->PauseGame();
+		}
+	}
+	// todo logic to create widget
+	
+}
+
+void AGGJProjectCharacter::CooldownTest(const FInputActionValue& Value)
+{
+	OnBubblePowDelegate.Broadcast();
 }
