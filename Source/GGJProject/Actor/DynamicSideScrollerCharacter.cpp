@@ -64,13 +64,13 @@ ADynamicSideScrollerCharacter::ADynamicSideScrollerCharacter()
 
 	bBufferedJump = false;
 
-	bIsSolidBubbleSpawned = false;
+	bIsSolidBubbleSpawned = true;
 	SolidBubbleCooldown = 1.0f;
 
-	bIsCloudBubbleSpawned = false;
+	bIsCloudBubbleSpawned = true;
 	CloudBubbleCooldown = 1.0f;
 
-	bIsPlugBubbleSpawned = false;
+	bIsPlugBubbleSpawned = true;
 	PlugBubbleCooldown = 1.0f;
 }
 
