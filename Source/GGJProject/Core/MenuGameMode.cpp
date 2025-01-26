@@ -3,15 +3,39 @@
 
 #include "MenuGameMode.h"
 #include "Blueprint/UserWidget.h"
+#include "Camera/CameraActor.h"
+#include "Kismet/GameplayStatics.h"
 
 void AMenuGameMode::BeginPlay()
 {
-    if (MenuWidgetClass)
+    if (!IsValid(MenuWidgetClass) )
     {
-        CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), MenuWidgetClass);
-        if (CurrentWidget)
-        {
-            CurrentWidget->AddToViewport();
-        }
+        return;
+    }
+    TArray<AActor*> FoundCameras;
+    UGameplayStatics::GetAllActorsOfClassWithTag(GetWorld(), ACameraActor::StaticClass(), FName("Menu"), FoundCameras);
+    if (FoundCameras.Num() > 0)
+    {
+       CurrentCamera = Cast<ACameraActor>(FoundCameras[0]);
+    }
+    
+    
+   
+    
+    if (!IsValid(CurrentCamera))
+    {
+        UE_LOG(LogTemp, Error, TEXT("Camera not valid!! Spawning") );
+        FActorSpawnParameters SpawnParameters;
+        SpawnParameters.Owner = this;
+        SpawnParameters.Instigator = GetInstigator();
+        CurrentCamera = GetWorld()->SpawnActor<ACameraActor>(CameraActorToSpawn, CameraSpawnLocation, CameraSpawnRotation, SpawnParameters);
+    }
+    APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
+    PlayerController->SetViewTarget(CurrentCamera);
+    
+    CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), MenuWidgetClass);
+    if (CurrentWidget)
+    {
+        CurrentWidget->AddToViewport();
     }
 }
