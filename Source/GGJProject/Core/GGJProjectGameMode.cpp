@@ -5,6 +5,8 @@
 #include "AbilityIcon.h"
 #include "GameHUD.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/TextBlock.h"
+#include "GGJProject/Actor/DynamicSideScrollerCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
 #include "GGJProject/Actor/Component/SuperellipseOrbitComponent.h"
@@ -18,7 +20,7 @@ void AGGJProjectGameMode::BeginPlay()
 	if (GameHUDClass)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Here2") );
-		UGameHUD* GameHUD{ CreateWidget<UGameHUD>(GetWorld(), GameHUDClass)};
+		GameHUD = CreateWidget<UGameHUD>(GetWorld(), GameHUDClass);
 		if (GameHUD)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Here3") );
@@ -27,6 +29,7 @@ void AGGJProjectGameMode::BeginPlay()
 	}
 
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	
 
 	if (PlayerController)
 	{
@@ -89,7 +92,57 @@ void AGGJProjectGameMode::QuitGame()
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("LevelToLoad is not set!"));
+		FString LevelName = TEXT("/Game/Maps/Menu");
+		if (FPackageName::IsValidLongPackageName(LevelName))
+		{
+			UGameplayStatics::OpenLevel(GetWorld(), FName(*LevelName));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Invalid Level Path: %s"), *LevelName);
+		}
+	}
+}
+
+void AGGJProjectGameMode::EnableAbility(const EAbilities Ability)
+{
+	UGameHUD* GameHUDInstance { Cast<UGameHUD>(GameHUD)};
+	if (IsValid(GameHUDInstance))
+	{
+		switch (Ability)
+		{
+			case EAbilities::Pow:
+				if (!GameHUDInstance->AbilityIconPow->IsVisible())
+				{
+					GameHUDInstance->AbilityIconPow->SetVisibility(ESlateVisibility::Visible);
+					GameHUDInstance->Character->OnPlugBubbleDelegate.AddDynamic(GameHUDInstance->AbilityIconPow, &UAbilityIcon::StartCooldown);
+					GameHUDInstance->Tutoring->SetText(GameHUDInstance->TutoringTextPow);
+					GameHUDInstance->Tutoring->SetVisibility(ESlateVisibility::Visible);
+					FTimerHandle TimerHandle;
+					GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this, GameHUDInstance]()
+					{
+						GameHUDInstance->Tutoring->SetVisibility(ESlateVisibility::Hidden);
+					} ,GameHUDInstance->HideTutorialTextAfter, false);
+				}
+				break;
+			case EAbilities::Sturdy:
+				if (!GameHUDInstance->AbilityIconSturdy->IsVisible())
+				{
+					GameHUDInstance->AbilityIconSturdy->SetVisibility(ESlateVisibility::Visible);
+					GameHUDInstance->Character->OnSolidBubbleDelegate.AddDynamic(GameHUDInstance->AbilityIconSturdy, &UAbilityIcon::StartCooldown);
+					GameHUDInstance->Tutoring->SetText(GameHUDInstance->TutoringTextSturdy);
+					GameHUDInstance->Tutoring->SetVisibility(ESlateVisibility::Visible);
+					FTimerHandle TimerHandle;
+					GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this, GameHUDInstance]()
+					{
+						GameHUDInstance->Tutoring->SetVisibility(ESlateVisibility::Hidden);
+					} ,GameHUDInstance->HideTutorialTextAfter, false);
+				}
+				break;
+			default:
+				UE_LOG(LogTemp, Error, TEXT("Unknown Ability") );
+				break;
+		}
 	}
 }
 

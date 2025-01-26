@@ -7,6 +7,13 @@
 class UGameHUD;
 class USuperellipseOrbitComponent;
 
+UENUM(BlueprintType)
+enum EAbilities : uint8
+{
+	Pow UMETA(DisplayName = "Pow"),
+	Sturdy UMETA(DisplayName = "Sturdy")
+};
+
 UCLASS(MinimalAPI)
 class AGGJProjectGameMode : public AGameModeBase
 {
@@ -15,7 +22,7 @@ class AGGJProjectGameMode : public AGameModeBase
 protected:
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu", meta = (AllowPrivateAccess = "true", AllowedClasses = "World"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu", meta = (AllowedClasses = "World"))
 	TSoftObjectPtr<UWorld> LevelToLoad;
 
 
@@ -37,6 +44,11 @@ public:
 	TSubclassOf<UUserWidget> PauseMenuWidgetClass;
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UUserWidget> PauseWidget;
+	UFUNCTION(BlueprintCallable)
+	void EnableAbility(const EAbilities Ability);
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UUserWidget> GameHUD;
+	
 
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
