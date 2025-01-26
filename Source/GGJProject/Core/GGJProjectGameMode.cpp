@@ -18,7 +18,7 @@ void AGGJProjectGameMode::BeginPlay()
 	if (GameHUDClass)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Here2") );
-		UGameHUD* GameHUD{ CreateWidget<UGameHUD>(GetWorld(), GameHUDClass)};
+		GameHUD = CreateWidget<UGameHUD>(GetWorld(), GameHUDClass);
 		if (GameHUD)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Here3") );
@@ -90,6 +90,26 @@ void AGGJProjectGameMode::QuitGame()
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("LevelToLoad is not set!"));
+	}
+}
+
+void AGGJProjectGameMode::EnableAbility(const EAbilities Ability)
+{
+	UGameHUD* GameHUDInstance { Cast<UGameHUD>(GameHUD)};
+	if (IsValid(GameHUDInstance))
+	{
+		switch (Ability)
+		{
+			case EAbilities::Pow:
+				GameHUDInstance->AbilityIconPow->SetVisibility(ESlateVisibility::Visible);
+				break;
+			case EAbilities::Sturdy:
+				GameHUDInstance->AbilityIconSturdy->SetVisibility(ESlateVisibility::Visible);
+				break;
+			default:
+				UE_LOG(LogTemp, Error, TEXT("Unknown Ability") );
+				break;
+		}
 	}
 }
 

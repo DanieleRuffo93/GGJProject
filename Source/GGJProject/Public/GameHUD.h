@@ -22,8 +22,6 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "HUD")
 	void InitializeHUD();
 
-protected:
-	// Riferimenti ai widget figli (icone delle abilità)
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), category = "HUD", EditDefaultsOnly)
 	TObjectPtr<UAbilityIcon> AbilityIconSturdy;
 
@@ -32,6 +30,10 @@ protected:
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), category = "HUD", EditDefaultsOnly)
 	TObjectPtr<UAbilityIcon> AbilityIconBouncy;
+
+protected:
+
+	
 
 	virtual void NativeConstruct() override;
 

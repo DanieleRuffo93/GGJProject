@@ -7,6 +7,13 @@
 class UGameHUD;
 class USuperellipseOrbitComponent;
 
+UENUM(BlueprintType)
+enum EAbilities : uint8
+{
+	Pow UMETA(DisplayName = "Pow"),
+	Sturdy UMETA(DisplayName = "Sturdy")
+};
+
 UCLASS(MinimalAPI)
 class AGGJProjectGameMode : public AGameModeBase
 {
@@ -37,6 +44,11 @@ public:
 	TSubclassOf<UUserWidget> PauseMenuWidgetClass;
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UUserWidget> PauseWidget;
+	UFUNCTION(BlueprintCallable)
+	void EnableAbility(const EAbilities Ability);
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UUserWidget> GameHUD;
+	
 
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
