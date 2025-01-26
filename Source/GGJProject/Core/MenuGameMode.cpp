@@ -18,10 +18,6 @@ void AMenuGameMode::BeginPlay()
     {
        CurrentCamera = Cast<ACameraActor>(FoundCameras[0]);
     }
-    
-    
-   
-    
     if (!IsValid(CurrentCamera))
     {
         UE_LOG(LogTemp, Error, TEXT("Camera not valid!! Spawning") );
