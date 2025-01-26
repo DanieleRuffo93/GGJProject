@@ -128,7 +128,7 @@ void USuperellipseOrbitComponent::GetCenterAndSqrRadius(FVector& Center, float& 
 
 void USuperellipseOrbitComponent::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
-	Super::PostEditChangeProperty(PropertyChangedEvent);
+	//Super::PostEditChangeProperty(PropertyChangedEvent);
 
 	AActor* Owner = GetOwner();
 	if (!IsValid(Owner) || !Owner->IsA<AStaticMeshActor>())
