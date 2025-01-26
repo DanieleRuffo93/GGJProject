@@ -136,8 +136,6 @@ protected:
 	void SpawnFeetVFX();
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "VFX")
 	void DespawnFeetVFX();
-
-protected:
 	
 	virtual void BeginPlay() override;
 
@@ -158,7 +156,12 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	bool bIsPauseMenuVisible{ false };
 	
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	float SecondsForBufferedJump {0.2};
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	float BufferedJumpTimestamp;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	bool bIsPlayerJumping{false};
 
 	
 };

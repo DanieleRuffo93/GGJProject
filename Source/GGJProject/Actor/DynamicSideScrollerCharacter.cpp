@@ -140,18 +140,22 @@ void ADynamicSideScrollerCharacter::BeginPlay()
 
 void ADynamicSideScrollerCharacter::Jump()
 {
-	if (!CanJump())
+	if (bIsPlayerJumping)
 	{
-		BufferJump();
+		UE_LOG(LogTemp, Warning, TEXT("Saving Jump timestamp") );
+		BufferedJumpTimestamp = GetWorld()->GetTimeSeconds();
 		return;
 	}
 	
 	Super::Jump();
+	UE_LOG(LogTemp, Warning, TEXT("Jumping") );
+	bIsPlayerJumping = true;
 
 	DespawnFeetVFX();
 
 	if (bCanJump)
 	{
+		
 		FVector LaunchVector(0.0f, 0.0f, GetCharacterMovement()->JumpZVelocity);
 		LaunchCharacter(LaunchVector, false, false);
 	}
@@ -179,8 +183,17 @@ void ADynamicSideScrollerCharacter::OnUnbufferedJump_Implementation()
 
 void ADynamicSideScrollerCharacter::Landed(const FHitResult& Hit)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Landed") );
 	Super::Landed(Hit);
-
+	bIsPlayerJumping = false;
+	bCanJump = true;
+	float LandedTime = GetWorld()->GetTimeSeconds();
+	UE_LOG(LogTemp, Warning, TEXT("Seconds Buffered: %f"), LandedTime - BufferedJumpTimestamp );
+	if (LandedTime - BufferedJumpTimestamp <= SecondsForBufferedJump && BufferedJumpTimestamp > 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Should jump again") );
+		Jump();
+	}
 
 
 }
@@ -271,7 +284,6 @@ void ADynamicSideScrollerCharacter::Move(const FInputActionValue& Value)
 	}
 
 	int8 MovementDirection = (InputValue > 0.0f) ? 1 : -1;
-	UE_LOG(LogTemp, Warning, TEXT("MovementDirection: %d"), MovementDirection);
 	CurrentAngle = OrbitComponent->CalculateDeltaAngle(CurrentAngle, GetWorld()->GetDeltaSeconds(), GetCharacterMovement()->MaxWalkSpeed, MovementDirection);
 	
 	FVector2D NextPosition2D = OrbitComponent->CalculatePosition(CurrentAngle);

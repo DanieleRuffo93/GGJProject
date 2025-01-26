@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "GameHUD.generated.h"
 
+class UTextBlock;
 class ADynamicSideScrollerCharacter;
 class AGGJProjectCharacter;
 class UAbilityIcon;
@@ -31,6 +32,19 @@ public:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget), category = "HUD", EditDefaultsOnly)
 	TObjectPtr<UAbilityIcon> AbilityIconBouncy;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HUD")
+	TObjectPtr<ADynamicSideScrollerCharacter> Character;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HUD", meta = (BindWidget))
+	TObjectPtr<UTextBlock> Tutoring;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HUD")
+	FText TutoringTextPow;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HUD")
+	FText TutoringTextSturdy;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HUD")
+	float HideTutorialTextAfter {1.f};
+
 protected:
 
 	
@@ -38,8 +52,7 @@ protected:
 	virtual void NativeConstruct() override;
 
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess=true), Category = "HUD")
-	TObjectPtr<ADynamicSideScrollerCharacter> Character;
+	
 
 	bool bIsAlreadyInitialized {false};
 	

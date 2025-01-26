@@ -31,11 +31,14 @@ void AMenuGameMode::BeginPlay()
         CurrentCamera = GetWorld()->SpawnActor<ACameraActor>(CameraActorToSpawn, CameraSpawnLocation, CameraSpawnRotation, SpawnParameters);
     }
     APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
-    PlayerController->SetViewTarget(CurrentCamera);
+    
     
     CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), MenuWidgetClass);
-    if (CurrentWidget)
+    if (CurrentWidget && PlayerController)
     {
+        PlayerController->SetViewTarget(CurrentCamera);
+        PlayerController->bShowMouseCursor = true;
+        PlayerController->SetInputMode(FInputModeUIOnly());
         CurrentWidget->AddToViewport();
     }
 }

@@ -5,6 +5,8 @@
 #include "AbilityIcon.h"
 #include "GameHUD.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/TextBlock.h"
+#include "GGJProject/Actor/DynamicSideScrollerCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
 #include "GGJProject/Actor/Component/SuperellipseOrbitComponent.h"
@@ -27,6 +29,7 @@ void AGGJProjectGameMode::BeginPlay()
 	}
 
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	
 
 	if (PlayerController)
 	{
@@ -101,10 +104,32 @@ void AGGJProjectGameMode::EnableAbility(const EAbilities Ability)
 		switch (Ability)
 		{
 			case EAbilities::Pow:
-				GameHUDInstance->AbilityIconPow->SetVisibility(ESlateVisibility::Visible);
+				if (!GameHUDInstance->AbilityIconPow->IsVisible())
+				{
+					GameHUDInstance->AbilityIconPow->SetVisibility(ESlateVisibility::Visible);
+					GameHUDInstance->Character->OnPlugBubbleDelegate.AddDynamic(GameHUDInstance->AbilityIconPow, &UAbilityIcon::StartCooldown);
+					GameHUDInstance->Tutoring->SetText(GameHUDInstance->TutoringTextPow);
+					GameHUDInstance->Tutoring->SetVisibility(ESlateVisibility::Visible);
+					FTimerHandle TimerHandle;
+					GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this, GameHUDInstance]()
+					{
+						GameHUDInstance->Tutoring->SetVisibility(ESlateVisibility::Hidden);
+					} ,GameHUDInstance->HideTutorialTextAfter, false);
+				}
 				break;
 			case EAbilities::Sturdy:
-				GameHUDInstance->AbilityIconSturdy->SetVisibility(ESlateVisibility::Visible);
+				if (!GameHUDInstance->AbilityIconSturdy->IsVisible())
+				{
+					GameHUDInstance->AbilityIconSturdy->SetVisibility(ESlateVisibility::Visible);
+					GameHUDInstance->Character->OnSolidBubbleDelegate.AddDynamic(GameHUDInstance->AbilityIconSturdy, &UAbilityIcon::StartCooldown);
+					GameHUDInstance->Tutoring->SetText(GameHUDInstance->TutoringTextSturdy);
+					GameHUDInstance->Tutoring->SetVisibility(ESlateVisibility::Visible);
+					FTimerHandle TimerHandle;
+					GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this, GameHUDInstance]()
+					{
+						GameHUDInstance->Tutoring->SetVisibility(ESlateVisibility::Hidden);
+					} ,GameHUDInstance->HideTutorialTextAfter, false);
+				}
 				break;
 			default:
 				UE_LOG(LogTemp, Error, TEXT("Unknown Ability") );
