@@ -22,7 +22,7 @@ class AGGJProjectGameMode : public AGameModeBase
 protected:
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu", meta = (AllowPrivateAccess = "true", AllowedClasses = "World"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu", meta = (AllowedClasses = "World"))
 	TSoftObjectPtr<UWorld> LevelToLoad;
 
 

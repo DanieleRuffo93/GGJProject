@@ -92,7 +92,15 @@ void AGGJProjectGameMode::QuitGame()
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("LevelToLoad is not set!"));
+		FString LevelName = TEXT("/Game/Maps/Menu");
+		if (FPackageName::IsValidLongPackageName(LevelName))
+		{
+			UGameplayStatics::OpenLevel(GetWorld(), FName(*LevelName));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Invalid Level Path: %s"), *LevelName);
+		}
 	}
 }
 
