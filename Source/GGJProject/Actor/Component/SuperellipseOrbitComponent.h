@@ -40,7 +40,7 @@ public:
 	float OrbitLength {0};
 	bool bHasBeenInitialized {false};
 	
-	
+	UFUNCTION(BlueprintCallable)
 	FVector2D CalculatePosition(float Angle, float RadiusOverride = -1.f) const;
 	float CalculateDeltaAngle(float CurrentAngle, float DeltaTime, float RotationSpeed, int8 MovementDirection) const;
 	FVector GetTangentDirection(float Angle, int32 Direction) const;
