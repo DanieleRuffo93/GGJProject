@@ -22,7 +22,7 @@ To ensure stability and smooth development:
 - Andrea Stelliferi
 
 ### Artists
-- Aurora Raffeli Albo  
+- Aurora Raffaeli Albo  
 - Miguel Hinojosa  
 
 ### Designer

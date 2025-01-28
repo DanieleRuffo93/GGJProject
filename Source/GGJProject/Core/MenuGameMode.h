@@ -22,5 +22,14 @@ protected:
 
     UPROPERTY()
     TObjectPtr<UUserWidget> CurrentWidget;
+
+	UPROPERTY(EditAnywhere, Category=Camera)
+	TSubclassOf<ACameraActor> CameraActorToSpawn;
+	UPROPERTY(EditAnywhere, Category=Camera)
+	FVector CameraSpawnLocation;
+	UPROPERTY(EditAnywhere, Category=Camera)
+	FRotator CameraSpawnRotation;
+	UPROPERTY(VisibleAnywhere, Category=Camera)
+	TObjectPtr<ACameraActor> CurrentCamera;
 	
 };
